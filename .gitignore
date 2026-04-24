@@ -1,0 +1,50 @@
+# Operator reference implementation — .gitignore
+
+# Node / TypeScript
+node_modules/
+dist/
+build/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+.npm/
+.pnpm-store/
+
+# Env secrets (operator-only; not for repo)
+.env
+.env.local
+.env.*.local
+
+# TypeScript build cache
+*.tsbuildinfo
+.tsc-cache/
+
+# Vitest / test output
+coverage/
+.vitest-cache/
+
+# Vite / frontend
+.vite/
+vite.config.ts.timestamp-*
+.parcel-cache/
+
+# Keeper runtime state (per-operator, not in repo)
+data/
+logs/
+cooldowns.json
+pending-swaps.json
+swap-loss-state.json
+vault_history.jsonl
+apy_history.jsonl
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# OS
+Thumbs.db
+ehthumbs.db
