@@ -19,7 +19,7 @@ OptiVaults V1 is deliberately structured as **two separable layers**:
 | Layer | Repo | What it is | Fee |
 |-------|------|-----------|-----|
 | **Protocol layer (public good)** | [`optivaults-protocol`](https://github.com/OptiVaults/optivaults-protocol) | Aiken validators + spec + whitepaper + deploy scripts. Apache 2.0. Anyone may fork and launch their own vault without paying anything. | 0% — pure public good. |
-| **Operator layer (this repo)** | `optivaults-reference` | Reference TypeScript implementation of the keeper, API, frontend, CLI tools. Apache 2.0. Runs a live vault instance on behalf of users via `optivaults.app`. | 4.5% of realised yield (hard-capped in the contract; 20% to keeper / 80% to treasury; see [fee breakdown](https://github.com/OptiVaults/optivaults-protocol/blob/v1/docs/economics.md)). |
+| **Operator layer (this repo)** | `optivaults-reference` | Reference TypeScript implementation of the keeper, API, frontend, CLI tools. Apache 2.0. Runs a live vault instance on behalf of users via `optivaults.app`. | 4.5% of realised yield (hard-capped in the contract; at V1 launch 40% to keeper / 0% to gov pool / 60% to treasury; see [fee breakdown](https://github.com/OptiVaults/optivaults-protocol/blob/v1/docs/economics.md)). |
 
 **Why two repos?** Because these are two fundamentally different things:
 
@@ -63,16 +63,17 @@ Your instance is independent of the OptiVaults-operated instance. The two will n
 
 ## Operator governance & fee disclosure
 
-The operator instance run by OptiVaults (at `optivaults.app`) is funded by the contract-enforced 4.5% performance fee. Breakdown (see [economics.md](https://github.com/OptiVaults/optivaults-protocol/blob/v1/docs/economics.md) for full math):
+The operator instance run by OptiVaults (at `optivaults.app`) is funded by the contract-enforced 4.5% performance fee. V1-launch breakdown (see [economics.md](https://github.com/OptiVaults/optivaults-protocol/blob/v1/docs/economics.md) for full math):
 
-- **20% of fee** → signing keeper (covers operational cost per Compound)
-- **80% of fee** → on-chain treasury (contract-enforced category allocation):
-  - 30% audit reserve
-  - 40% operations (VPS, Blockfrost, monitoring, CDN)
-  - 20% R&D (future integrations, contributor bounties, ecosystem grants)
+- **40% of fee** → signing keeper (covers operational cost per Compound; set at the validator hard cap to support open-source third-party keeper viability)
+- **0% of fee** → governance signer pool (disabled at V1 launch; activated in Phase 2+ via `UpdateFeeSplit`, capped at 10%)
+- **60% of fee** → on-chain treasury, sub-allocated 40 / 25 / 25 / 10 at launch (governance-adjustable within bounds):
+  - 40% audit reserve
+  - 25% operations (platform layer — VPS, Blockfrost, monitoring, CDN; per-keeper infra is funded directly out of the keeper's 40% share)
+  - 25% R&D (future integrations, contributor bounties, ecosystem grants)
   - 10% buffer (unexpected costs, legal, incident response)
 
-Governance-adjustable categories have caps enforced in the contract (individual category ≤ 50% of inflow, audit reserve floor ≥ 20%). The 4.5% performance-fee rate is itself hard-capped in the contract and **cannot be raised by governance under any redeemer path**.
+Hard caps enforced in the contract: `keeper_fee_bps ≤ 4000` (40%), `gov_fee_bps ≤ 1000` (10%), `keeper + gov ≤ 5000` (treasury floor ≥ 50%); each treasury sub-category `bps ∈ [0, 5000]` (no single category may exceed 50% of treasury inflow); `min_audit_reserve` is an absolute USDCx floor set immutably at deploy. The 4.5% performance-fee rate is itself hard-capped in the contract and **cannot be raised by governance under any redeemer path**.
 
 **No founder dividend. No investor return. No token issuance. No SAFE / SAFT.** The 4.5% fee is pure cost-recovery + long-term protocol sustainability; the specific split is disclosed on-chain via `TreasuryDatum` and in the treasury's `recent_spend_log`.
 

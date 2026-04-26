@@ -19,7 +19,7 @@ OptiVaults V1 **刻意被設計成兩個可分離的層**:
 | 層 | Repo | 是什麼 | Fee |
 |----|------|--------|-----|
 | **協議層(公共財)** | [`optivaults-protocol`](https://github.com/OptiVaults/optivaults-protocol) | Aiken validators + spec + whitepaper + 部署腳本。Apache 2.0。**任何人都能 fork 並啟動自己的 vault,完全免付費**。 | 0%——純公共財。 |
-| **Operator 層(本 repo)** | `optivaults-reference` | keeper / API / frontend / CLI 工具的 TypeScript 參考實作。Apache 2.0。在 `optivaults.app` 代使用者跑活的 vault 實例。 | 已實現收益的 4.5%(**合約硬上限**;20% 給 keeper / 80% 進 treasury;費用拆分見 [economics.md](https://github.com/OptiVaults/optivaults-protocol/blob/v1/docs/economics.md))。 |
+| **Operator 層(本 repo)** | `optivaults-reference` | keeper / API / frontend / CLI 工具的 TypeScript 參考實作。Apache 2.0。在 `optivaults.app` 代使用者跑活的 vault 實例。 | 已實現收益的 4.5%(**合約硬上限**;V1 啟動分配為 40% 給 keeper / 0% 給治理池 / 60% 進 treasury;費用拆分見 [economics.md](https://github.com/OptiVaults/optivaults-protocol/blob/v1/docs/economics.md))。 |
 
 **為什麼要兩個 repo?** 因為這是兩個**根本不同**的東西:
 
@@ -63,16 +63,17 @@ OptiVaults 的設計讓**任何團隊都能 fork 協議、啟動自己的 vault 
 
 ## Operator 治理與 fee 揭露
 
-OptiVaults 運營的實例(`optivaults.app`)由合約強制的 4.5% 績效費支撐。拆分(完整數學見 [economics.md](https://github.com/OptiVaults/optivaults-protocol/blob/v1/docs/economics.md)):
+OptiVaults 運營的實例(`optivaults.app`)由合約強制的 4.5% 績效費支撐。V1 啟動拆分(完整數學見 [economics.md](https://github.com/OptiVaults/optivaults-protocol/blob/v1/docs/economics.md)):
 
-- **fee 的 20%** → 簽名 keeper(每筆 Compound 的運營成本補償)
-- **fee 的 80%** → 鏈上 treasury(**合約強制類別分配**):
-  - 30% audit reserve
-  - 40% operations(VPS、Blockfrost、監控、CDN)
-  - 20% R&D(未來整合、貢獻者 bounty、生態補助)
+- **fee 的 40%** → 簽名 keeper(每筆 Compound 的運營成本補償;設在 validator 硬上限,以支持開源第三方 keeper 的可行性)
+- **fee 的 0%** → 治理簽名者池(V1 啟動時關閉;Phase 2+ 透過 `UpdateFeeSplit` 啟用,上限 10%)
+- **fee 的 60%** → 鏈上 treasury,啟動子分配 40 / 25 / 25 / 10(治理可在上限內調整):
+  - 40% audit reserve
+  - 25% operations(平台層基礎設施——VPS、Blockfrost、監控、CDN;**個別 keeper 自己的基礎設施改由 keeper 那 40% 直接份額支付**,不再走 ops bucket)
+  - 25% R&D(未來整合、貢獻者 bounty、生態補助)
   - 10% buffer(預期外支出、法律、事件應變)
 
-治理可調整的類別有合約強制上限(單一類別 ≤ inflow 的 50%、audit reserve 下限 ≥ 20%)。**4.5% 績效費本身是合約硬上限,治理在任何 redeemer 路徑下都無法提高**。
+合約強制的硬上限:`keeper_fee_bps ≤ 4000`(40%)、`gov_fee_bps ≤ 1000`(10%)、`keeper + gov ≤ 5000`(treasury 下限 ≥ 50%);treasury 每個子類別 `bps ∈ [0, 5000]`(單一類別不得超過 treasury inflow 的 50%);`min_audit_reserve` 是部署時寫死的**絕對 USDCx 下限**。**4.5% 績效費本身是合約硬上限,治理在任何 redeemer 路徑下都無法提高**。
 
 **無創辦人 dividend、無投資人 return、無 token 發行、無 SAFE / SAFT**。4.5% fee 純屬成本回收 + 長期協議可持續性;具體拆分透過鏈上 `TreasuryDatum` 與 treasury 的 `recent_spend_log` 揭露。
 
