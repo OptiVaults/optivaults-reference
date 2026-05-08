@@ -1,0 +1,105 @@
+@import "tailwindcss";
+
+:root {
+  --bg-primary: #0f172a;
+  --bg-card: #1e293b;
+  --accent-cyan: #06b6d4;
+  --accent-emerald: #34d399;
+  --accent-amber: #f59e0b;
+  --accent-red: #ef4444;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg-primary);
+  color: #f8fafc;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+/* Subtle radial glow — cyan/emerald only, mirrors v1 frontend */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 25% 25%, rgba(6, 182, 212, 0.04) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(52, 211, 153, 0.03) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+#root {
+  position: relative;
+  z-index: 1;
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #06b6d4 0%, #34d399 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glass cards — match v1 frontend exactly */
+.glass-card {
+  background: rgba(30, 41, 59, 0.7);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.glass-card:hover {
+  border-color: rgba(6, 182, 212, 0.15);
+}
+
+.glow-border {
+  box-shadow:
+    0 0 20px rgba(6, 182, 212, 0.08),
+    0 0 60px rgba(52, 211, 153, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+/* Sunset section danger glow — amber */
+.glass-card.danger {
+  background: rgba(120, 53, 15, 0.25);
+  border-color: rgba(245, 158, 11, 0.25);
+}
+.glass-card.danger:hover {
+  border-color: rgba(245, 158, 11, 0.45);
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+.pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(71, 85, 105, 0.5); border-radius: 3px; }
+
+/* Inputs */
+input[type="text"],
+input[type="password"],
+input[type="number"],
+select {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(71, 85, 105, 0.5);
+  border-radius: 0.5rem;
+  padding: 0.625rem 0.875rem;
+  color: #f8fafc;
+  font-family: inherit;
+  font-size: 0.95rem;
+  width: 100%;
+}
+input:focus, select:focus {
+  outline: none;
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 0 1px rgba(6, 182, 212, 0.3);
+}
