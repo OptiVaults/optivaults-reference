@@ -1,0 +1,43 @@
+{
+  "name": "@optivaults/v1-withdraw-cli",
+  "version": "0.1.0",
+  "description": "V1 command-line self-serve withdrawal + dead-man-switch trigger for OptiVaults. Runs locally, no backend dependency.",
+  "type": "module",
+  "bin": {
+    "optivaults-v1-withdraw": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "config",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup src/cli.ts --format esm --target node20 --out-dir dist && chmod +x dist/cli.js",
+    "dev": "tsx src/cli.ts",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@lucid-evolution/lucid": "^0.4.29",
+    "commander": "^12.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "tsup": "^8.2.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.0"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "Apache-2.0",
+  "keywords": [
+    "cardano",
+    "optivaults",
+    "withdraw",
+    "defi",
+    "emergency",
+    "cli",
+    "v1",
+    "community-sunset"
+  ]
+}

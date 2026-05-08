@@ -1,0 +1,22 @@
+{
+  "network": "Mainnet",
+  "releaseTag": "PLACEHOLDER",
+  "_comment": "V1 mainnet ceremony has not been performed yet. Replace this entire file with the published ceremony JSON when V1 launches on mainnet (or pass --config <path> to point at a hosted JSON URL).",
+  "mints": {
+    "vaultNft": {
+      "policyId": "",
+      "assetName": ""
+    },
+    "governanceNft": {
+      "policyId": "",
+      "assetName": ""
+    },
+    "registryAuthNft": {
+      "policyId": "",
+      "assetName": ""
+    }
+  },
+  "refScripts": {},
+  "stateUtxos": {},
+  "hashes": {}
+}
