@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="color-scheme" content="dark" />
+
+  <title>OptiVaults — Auto-Yield Stablecoin Vault on Cardano</title>
+  <meta name="description"
+    content="OptiVaults V1 — non-custodial auto-yield stablecoin vault on Cardano. Deposit USDCx, receive vUSDCx shares whose value accrues via auto-compounding. 17 Aiken PlutusV3 logic validators + 4 NFT mint policies + 1 DEX adapter; m-of-n MultisigGov with 7-21 day timelocks; external audit target Q2-Q3 2027." />
+  <meta name="keywords"
+    content="OptiVaults, Cardano, DeFi, yield vault, stablecoin, auto-yield, Aiken, PlutusV3, vUSDCx, USDCx, Liqwid, Liqwid Finance, non-custodial, Cardano DeFi, auto-compound, DJED, USDM, CIP-30, Eternl, Lace, eUTXO" />
+  <meta name="author" content="OptiVaults" />
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+
+  <!--
+    Operator-specific URLs (canonical, og, twitter, manifest).
+    Default below targets the OptiVaults-operated instance at v1.optivaults.app.
+    Operators forking this repo and running their own instance should replace
+    every occurrence of `v1.optivaults.app` with their own domain.
+  -->
+  <link rel="canonical" href="https://v1.optivaults.app/" />
+  <link rel="alternate" hreflang="en" href="https://v1.optivaults.app/" />
+  <link rel="alternate" hreflang="zh-Hant" href="https://v1.optivaults.app/" />
+  <link rel="alternate" hreflang="ja" href="https://v1.optivaults.app/" />
+  <link rel="alternate" hreflang="x-default" href="https://v1.optivaults.app/" />
+
+  <!-- Favicons & PWA -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png" />
+  <link rel="icon" type="image/png" sizes="64x64" href="/favicon-64x64.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/manifest.json" />
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://v1.optivaults.app/" />
+  <meta property="og:title" content="OptiVaults — Auto-Yield Stablecoin Vault on Cardano" />
+  <meta property="og:description"
+    content="V1 pre-launch — non-custodial USDCx auto-yield vault on Cardano. 17 logic validators + 4 NFT mint policies + 1 DEX adapter, m-of-n MultisigGov, external audit target Q2-Q3 2027." />
+  <meta property="og:image" content="/icon-512.png" />
+  <meta property="og:image:width" content="512" />
+  <meta property="og:image:height" content="512" />
+  <meta property="og:image:alt" content="OptiVaults logo" />
+  <meta property="og:site_name" content="OptiVaults" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:locale:alternate" content="zh_TW" />
+  <meta property="og:locale:alternate" content="ja_JP" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://v1.optivaults.app/" />
+  <meta name="twitter:title" content="OptiVaults — Auto-Yield Stablecoin Vault on Cardano" />
+  <meta name="twitter:description"
+    content="V1 pre-launch — non-custodial USDCx auto-yield vault on Cardano. Apache 2.0, fork-welcome." />
+  <meta name="twitter:image" content="/icon-512.png" />
+  <meta name="twitter:image:alt" content="OptiVaults logo" />
+
+  <!-- GEO / Dublin Core — Decentralized / Cardano mainnet -->
+  <meta name="geo.region" content="global" />
+  <meta name="geo.placename" content="Decentralized (Cardano Blockchain)" />
+  <meta name="distribution" content="global" />
+  <meta name="coverage" content="worldwide" />
+  <meta name="DC.title" content="OptiVaults — Auto-Yield Stablecoin Vault on Cardano (V1 pre-launch)" />
+  <meta name="DC.creator" content="OptiVaults" />
+  <meta name="DC.description"
+    content="Non-custodial auto-yield stablecoin vault on Cardano. V1 pre-launch — design + Aiken implementation complete (17 logic validators + 4 NFT mint policies + 1 DEX adapter = 22 compiled artefacts, 194 unit + property tests / 689 randomized checks pass), external audit target Q2-Q3 2027." />
+  <meta name="DC.publisher" content="OptiVaults" />
+  <meta name="DC.language" content="en, zh-TW, ja" />
+  <meta name="DC.format" content="text/html" />
+  <meta name="DC.type" content="InteractiveResource, Software" />
+  <meta name="DC.identifier" content="https://v1.optivaults.app/" />
+  <meta name="DC.rights" content="Apache License 2.0, open source at github.com/OptiVaults" />
+  <meta name="content-language" content="en, zh-TW, ja" />
+
+  <!-- AI / LLM Friendliness -->
+  <meta name="ai:summary"
+    content="OptiVaults V1 is the public-launch version of a non-custodial auto-yield stablecoin vault on Cardano, currently pre-launch (design + Aiken implementation complete, external audit target Q2-Q3 2027). Users deposit USDCx (issued by Circle via xReserve, launched on Cardano February 2026) and receive vUSDCx share tokens whose value accrues via auto-compounding. A keeper deploys capital to Liqwid Finance stablecoin markets (DJED, USDM) and Minswap V2 swap routes for diversified yield. Architecture: 17 Aiken PlutusV3 logic validators + 4 NFT mint policies + 1 DEX adapter using the Withdraw-Zero Forwarding Pattern — vault_proxy forwards to one of 10 staking validators (vault_user / vault_keeper_hot / vault_batcher / vault_swap_ada / vault_protocol / vault_recall / vault_liqwid / vault_gov_policy / vault_gov_emergency / vault_admin_deploy). 29-field VaultDatum with 15 immutable. Governance: m-of-n multisig with 7-21 day timelocks + 1-of-n cancel veto (3-of-3 unanimity targeted at launch). Three-way Compound fee split (launch 40% keeper / 0% gov / 60% treasury, hard caps 40/10/50). UpdateFeeSplit 21-day timelock. UpdateSlippagePolicy 48-hour timelock. Phase 1 three-layer governance safety (Layer 1 EmergencyWithdraw freeze-only / Layer 2 frozen-state USDCx swap-out / Layer 3 90-day permissionless CommunitySunset). License: Apache 2.0." />
+  <meta name="ai:category" content="DeFi, Yield Vault, Cardano Blockchain, Stablecoin Auto-Compounding" />
+  <meta name="ai:technology"
+    content="Aiken v1.1.x, PlutusV3, Cardano eUTXO, CIP-30, Liqwid Finance (DJED/USDM), Minswap V2 (ref-script SwapAdapter dispatch), Circle USDCx via xReserve, Withdraw-Zero Forwarding Pattern (10-route), MultisigGov (m-of-n + timelock + 1-of-n cancel)" />
+  <meta name="ai:llms_txt" content="https://optivaults.app/llms.txt" />
+  <meta name="ai:llms_full" content="https://optivaults.app/llms-full.txt" />
+  <meta name="ai:version" content="V1 pre-launch" />
+  <meta name="ai:source_repo" content="https://github.com/OptiVaults/optivaults-protocol" />
+  <meta name="ai:license" content="Apache License 2.0" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- JSON-LD: WebApplication -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "OptiVaults",
+    "alternateName": "OptiVaults Yield Vault",
+    "url": "https://v1.optivaults.app/",
+    "image": "https://v1.optivaults.app/icon-512.png",
+    "description": "Non-custodial auto-yield stablecoin vault on Cardano. Deposit USDCx, earn yield via diversified Liqwid Finance supply (45% DJED, 25% USDM, 30% USDCx idle buffer for instant withdrawals). V1 pre-launch with 17 Aiken PlutusV3 logic validators + 4 NFT mint policies + 1 DEX adapter, m-of-n MultisigGov governance, external audit target Q2-Q3 2027.",
+    "applicationCategory": "FinanceApplication",
+    "applicationSubCategory": "DeFi Yield Aggregator",
+    "operatingSystem": "Web",
+    "browserRequirements": "Requires a CIP-30 Cardano wallet (Eternl, Nami, Lace, Vespr, Typhon, Yoroi)",
+    "softwareVersion": "V1.0-pre-launch",
+    "releaseNotes": "V1 (public launch candidate, design + Aiken implementation complete): 17 logic validators + 4 NFT mint policies + 1 DEX adapter = 22 compiled artefacts, all under 16 KB PlutusV3 reference-script ceiling. 194 unit + property tests / 689 randomized checks pass. 3-way Compound fee split (launch 40% keeper / 0% gov / 60% treasury; hard caps keeper ≤ 40%, gov ≤ 10%, combined ≤ 50%, treasury floor ≥ 50%). UpdateFeeSplit 21-day timelock. UpdateSlippagePolicy 48-hour timelock. Phase 1 three-layer governance safety. 29-field VaultDatum with 15 immutable fields. License: Apache 2.0. External audit target Q2-Q3 2027.",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD",
+      "category": "DeFi Yield Optimization"
+    },
+    "featureList": [
+      "Auto-compounding yield from Liqwid Finance (DJED, USDM)",
+      "Diversified stablecoin allocation (45% DJED, 25% USDM, 30% USDCx idle buffer)",
+      "30% USDCx idle buffer for instant withdrawals (governance-adjustable)",
+      "Non-custodial — all funds controlled by smart contract, no admin-drain redeemer exists",
+      "7-day keeper-inactivity emergency escape with automatic early-withdraw fee waiver",
+      "15 immutable on-chain VaultDatum fields + compile-time Vault Identity NFT anchor",
+      "4.5% performance fee hard-capped in validator bytecode (unchangeable by governance)",
+      "0.1% early-withdraw fee deferred to remaining holders via share-price accrual",
+      "CIP-30 wallet support (Eternl, Lace, Vespr, Typhon, Yoroi)",
+      "m-of-n MultisigGov with 7-21 day timelocks + 1-of-n cancel veto (3-of-3 unanimity at launch)",
+      "Built with Aiken v1.1.x + PlutusV3 — 17 logic validators + 4 NFT mint policies + 1 DEX adapter",
+      "Apache 2.0 license — forks, specializations, and commercial reuse welcome"
+    ],
+    "creator": {
+      "@type": "Organization",
+      "name": "OptiVaults",
+      "url": "https://optivaults.app"
+    },
+    "keywords": "Cardano, DeFi, yield vault, stablecoin, Liqwid, auto-yield, PlutusV3, Aiken, non-custodial, vUSDCx, USDCx, DJED, USDM",
+    "inLanguage": ["en", "zh-TW", "ja"],
+    "audience": {
+      "@type": "Audience",
+      "audienceType": "Cardano DeFi users, stablecoin holders, yield farmers"
+    }
+  }
+  </script>
+
+  <!-- JSON-LD: FAQPage -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is USDCx?",
+        "acceptedAnswer": { "@type": "Answer", "text": "USDCx is a USD-pegged stablecoin on Cardano issued by Circle via its xReserve cross-chain reserve mechanism (launched on Cardano February 2026). Backed 1:1 by Circle's USDC reserves with monthly attestations by Deloitte. Uses Cardano native asset format — directly consumable on-chain without a wrapping contract. It is the primary deposit asset for OptiVaults. You can acquire USDCx on Minswap V2, SundaeSwap, or via Circle's xReserve bridge." }
+      },
+      {
+        "@type": "Question",
+        "name": "What is vUSDCx?",
+        "acceptedAnswer": { "@type": "Answer", "text": "vUSDCx is a share token representing your proportional ownership of the OptiVaults vault. As yield compounds and early-withdraw fees are deferred to remaining holders, the share price rises — so your vUSDCx becomes worth more USDCx over time." }
+      },
+      {
+        "@type": "Question",
+        "name": "How is yield distributed?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Yield is shared proportionally among all vUSDCx holders. When the keeper compounds yield, total_deposited increases but total_shares stays the same — raising the share price for everyone equally." }
+      },
+      {
+        "@type": "Question",
+        "name": "What yield strategies does OptiVaults use?",
+        "acceptedAnswer": { "@type": "Answer", "text": "OptiVaults deploys capital across diversified stablecoin markets on Liqwid Finance (DJED, USDM), keeping 30% in USDCx buffer for instant withdrawals. The automated keeper optimizes allocation across multiple yield sources based on real-time APY data." }
+      },
+      {
+        "@type": "Question",
+        "name": "What are the fees?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Performance fee: 4.5% on yield earned only (never on principal). Fee split at launch: keeper 40% / gov pool 0% / treasury 60% (hard caps keeper ≤ 40%, gov ≤ 10%, treasury floor ≥ 50%). Early withdrawal fee: 0.1% on direct withdrawals (waived for queue withdrawals and emergency mode). Transaction fee: ~1 ADA. Queue deposit: 0.5 ADA fee. Queue withdraw: 1 ADA fee. No deposit fees." }
+      },
+      {
+        "@type": "Question",
+        "name": "Is OptiVaults safe?",
+        "acceptedAnswer": { "@type": "Answer", "text": "OptiVaults V1 enforces all critical operations on-chain: 15 immutable datum fields + compile-time Vault Identity NFT anchor (phantom-vault defense), exact-value validation, m-of-n MultisigGov with 7-21 day timelocks + 1-of-n cancel veto, role separation across distinct identities (keeper / fee-collector / governance signers / ref-deployer), 4.5% performance fee hard-capped in validator bytecode, UpdateFeeSplit 21-day timelock against self-dealing, UpdateSlippagePolicy 48-hour timelock, Phase 1 three-layer governance safety (Layer 1 freeze-only EmergencyWithdraw / Layer 2 frozen-state USDCx swap-out / Layer 3 90-day permissionless CommunitySunset dead-man-switch). 17 Aiken PlutusV3 logic validators + 4 NFT mint policies + 1 DEX adapter. Multi-round internal audit complete; external audit target Q2-Q3 2027 gates the public launch. Pre-audit 100K USDCx TVL cap (operator-enforced)." }
+      },
+      {
+        "@type": "Question",
+        "name": "Can the admin steal my funds?",
+        "acceptedAnswer": { "@type": "Answer", "text": "No. Governance uses m-of-n multisig with 7-21 day timelocks. Keeper and Governance use separate keys with strictly separated permissions. 15 immutable fields are enforced on-chain. Admin cannot deploy deposit token (USDCx) or ADA. Only stranded non-deposit tokens via restricted fallback (gated by 7-day keeper inactivity + 21-day Registry timelock + whitelist). Multi-round internal audit complete; external third-party audit scheduled Q2-Q3 2027." }
+      },
+      {
+        "@type": "Question",
+        "name": "What if the keeper goes offline?",
+        "acceptedAnswer": { "@type": "Answer", "text": "If the keeper hasn't compounded for 7+ days, emergency mode activates. Any vUSDCx holder can withdraw their proportional share directly from the smart contract — no admin approval needed. The early withdrawal fee is also waived during emergency mode. After 90 days of keeper inactivity, the Layer 3 CommunitySunset dead-man-switch can be triggered permissionlessly to enable a permissionless USDCx exit even if all governance signers are unavailable." }
+      },
+      {
+        "@type": "Question",
+        "name": "Is the code audited?",
+        "acceptedAnswer": { "@type": "Answer", "text": "V1 contracts have been through multi-round internal audit (findings addressed). Independent third-party audit is targeted for Q2-Q3 2027 and gates the public launch. All code is open source (Apache 2.0) and verifiable on GitHub." }
+      },
+      {
+        "@type": "Question",
+        "name": "What wallets are supported?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Any CIP-30 compatible Cardano wallet: Eternl, Nami, Lace, Vespr, Flint, Yoroi, Typhon, and others. The wallet only needs to sign transactions — server-side TX building, no Lucid or WASM required on the client side." }
+      }
+    ]
+  }
+  </script>
+
+  <!-- JSON-LD: Organization -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "OptiVaults",
+    "url": "https://optivaults.app",
+    "logo": "https://v1.optivaults.app/icon-512.png",
+    "description": "Builders of non-custodial auto-yield vaults on Cardano blockchain.",
+    "foundingDate": "2026",
+    "knowsAbout": ["Cardano", "DeFi", "Smart Contracts", "Yield Optimization", "Aiken", "PlutusV3"]
+  }
+  </script>
+
+  <!-- JSON-LD: SoftwareApplication (for AI discovery) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "OptiVaults Smart Contract",
+    "applicationCategory": "BlockchainApplication",
+    "operatingSystem": "Cardano Blockchain",
+    "programmingLanguage": "Aiken",
+    "softwareVersion": "V1.0-pre-launch",
+    "codeRepository": "https://github.com/OptiVaults/optivaults-protocol",
+    "license": "https://www.apache.org/licenses/LICENSE-2.0",
+    "description": "Aiken PlutusV3 smart contracts for OptiVaults V1. 17 logic validators (vault_proxy + vault_user + vault_keeper_hot + vault_batcher + vault_swap_ada + vault_protocol + vault_recall + vault_liqwid + vault_gov_policy + vault_gov_emergency + vault_admin_deploy + keeper_stake_script + treasury + multisig_gov + registry + order + vusdcx) + 4 NFT mint policies (vault_nft + governance_nft + registry_auth_nft + gov_signer_nft) + 1 DEX adapter (minswap_v2_adapter) = 22 compiled artefacts. 29-field VaultDatum with 15 immutable fields. Withdraw-Zero Forwarding Pattern with 10 staking validators dispatched via vault_proxy. m-of-n MultisigGov with 7-21 day timelocks + 1-of-n cancel veto. Performance fee hard-capped at 4.5%. 3-way Compound fee split at launch (40% keeper / 0% gov / 60% treasury). 0.1% early withdraw fee deferred to remaining holders via share-price accrual. 7-day keeper-inactivity emergency escape. Layer 3 CommunitySunset 90-day permissionless dead-man-switch. External audit target Q2-Q3 2027. Apache 2.0 license."
+  }
+  </script>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx?v=__DEPLOY_TS__"></script>
+</body>
+
+</html>

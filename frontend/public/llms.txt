@@ -1,0 +1,66 @@
+# OptiVaults Vault App
+
+> Non-custodial auto-yield stablecoin vault on Cardano. **V1 pre-launch.** Design + Aiken implementation complete (17 logic validators + 4 NFT mint policies + 1 DEX adapter = 22 compiled artefacts). The OptiVaults team currently operates a Preprod testnet instance at v1-preprod.pages.dev for behavioural verification. V1 mainnet launch happens at the pre-audit 100K USDCx cap once §1.5 launch gates clear; external audit (target Q2-Q3 2027 if §8.1 funding stack delivers) lifts the cap toward Stage 3 — audit is a cap-lift gate, not a launch gate (see whitepaper §0.2).
+
+This is the OptiVaults V1 web application — the React/Vite frontend that talks to the OptiVaults V1 smart contracts on Cardano. Users deposit USDCx stablecoins (issued by Circle via xReserve) and receive vUSDCx share tokens whose value accrues via auto-compounding. An automated keeper deploys capital to Liqwid Finance stablecoin markets (DJED, USDM) and Minswap V2 swap routes. All accounting, fee enforcement, and security invariants are enforced entirely on-chain.
+
+## Key Facts
+
+- Blockchain: Cardano (eUTXO model)
+- Smart Contracts: Aiken PlutusV3
+- Current Version: **V1 pre-launch** (design + Aiken implementation complete; external audit target Q2-Q3 2027)
+- Architecture: Withdraw-Zero Forwarding Pattern. `vault_proxy` dispatches to 10 staking validators (`vault_user`, `vault_keeper_hot`, `vault_batcher`, `vault_swap_ada`, `vault_protocol`, `vault_recall`, `vault_liqwid`, `vault_gov_policy`, `vault_gov_emergency`, `vault_admin_deploy`). Plus `keeper_stake_script` (weekly rotation), on-chain `treasury` (4-category budget), `multisig_gov`, `registry` (9 fields), `order`, `vusdcx`, 4 NFT mint policies, and 1 DEX adapter (`minswap_v2_adapter`).
+- VaultDatum: 29 fields, 15 immutable
+- Share Token: vUSDCx (Cardano native asset)
+- Deposit Asset: USDCx — Cardano-native stablecoin issued by Circle via xReserve (launched on Cardano February 2026), 1:1 USDC-backed, monthly Deloitte attestations. 6 decimals. Minimum 10 USDCx.
+- Wallet Support: CIP-30 (Eternl, Nami, Lace, Vespr, Flint, Typhon, Yoroi)
+- Strategy (launch defaults, governance-adjustable): 30% USDCx idle buffer + 45% Liqwid DJED + 25% Liqwid USDM
+- Estimated APY: variable (depends on Liqwid market conditions; not guaranteed). Reference point: blended gross ~6.66% / net ~6.36% on a recent Liqwid snapshot.
+- Pre-audit TVL cap: 100,000 USDCx (operator-enforced; cap lifts toward Stage 3 ($500K → $2M) when external audit completes — target Q2-Q3 2027 if §8.1 funding stack delivers; under §8.1 Option D where audit funding never lands, V1 stays at 100K cap on mainnet indefinitely. Audit is a cap-lift gate, not a launch gate — see whitepaper §0.2)
+- Tests: 194 unit + property tests / 689 randomized checks (Aiken `aiken check`)
+- Security: multi-round internal audit complete (findings addressed); third-party audit target Q2-Q3 2027 gates Stage 2+ cap lift (not initial mainnet launch — V1 launches at 100K pre-audit cap when §1.5 launch gates clear)
+- License: Apache License 2.0 (permissive open-source, OSI-approved — fork + commercial use + competitive offerings all permitted)
+- Source (protocol): https://github.com/OptiVaults/optivaults-protocol
+- Source (operator reference): https://github.com/OptiVaults/optivaults-reference
+
+## How It Works
+
+1. Connect a CIP-30 Cardano wallet (Eternl, Nami, Lace, Vespr, etc.).
+2. **Deposit** — type the USDCx amount; the API builds the TX server-side; sign in your wallet; the vault mints vUSDCx shares to you.
+3. **Earn** — keeper auto-deploys capital to Liqwid (DJED, USDM) via Minswap V2 routes; on-chain Compound auto-collects yield → share price rises.
+4. **Withdraw** — burn vUSDCx for the corresponding USDCx. Two paths:
+   - Direct: instant, 0.1% fee deferred to remaining holders via share-price accrual.
+   - Queue: free (~5 minutes operational target).
+
+## Fees
+
+- **Performance fee:** 4.5% on yield only (never on principal). Hard-capped at 4.5% on-chain.
+- **Fee split at V1 launch:** keeper 40% / gov pool 0% / treasury 60% (Phase 2+ raises gov pool to 5-10% via UpdateFeeSplit 21-day timelock; treasury floor ≥ 50% always preserved). Keeper share at validator hard cap to support open-source third-party keeper viability.
+- **Direct withdrawal fee:** 0.1% — physically retained in the vault as share-price yield. Waived after 7-day keeper inactivity.
+- **Queue withdrawal:** free.
+- **Deposits:** no fee.
+
+## Security Highlights
+
+- 15 immutable datum fields + compile-time Vault NFT anchor (R55 phantom-vault defense)
+- Withdraw-Zero Forwarding Pattern (10 routes) with `withdrawal_count == 1` invariant
+- m-of-n MultisigGov (7-21 day timelocks + 1-of-n cancel veto; 3-of-3 unanimity at launch)
+- 4.5% performance fee hard-capped in validator bytecode (cannot be raised by governance under any redeemer)
+- UpdateFeeSplit 21-day timelock (longest action; self-dealing protection)
+- UpdateSlippagePolicy 48-hour timelock with on-chain slippage caps (`max_slippage_bps ≤ 500 bps`, `min_swap_peg_bps ∈ [9300, 9950]`)
+- Phase 1 three-layer governance safety: Layer 1 EmergencyWithdraw freeze-only / Layer 2 frozen-state USDCx swap-out / Layer 3 90-day permissionless CommunitySunset dead-man-switch
+- Role separation across keeper / fee-collector / governance signers / ref-deployer
+- 7-day keeper-inactivity emergency escape with automatic early-withdraw fee waiver
+- Per-market Liqwid position tracking (qToken-rate-inflation defense)
+
+## Languages
+
+App is available in English / 繁體中文 / 日本語 (CIP-30 wallet button + dashboard + deposit/withdraw flows + FAQ). Switch via the language toggle in the navigation.
+
+## More
+
+- App: https://v1.optivaults.app (operator-hosted instance)
+- Landing: https://optivaults.app
+- Protocol whitepaper (EN): https://github.com/OptiVaults/optivaults-protocol/blob/v1/whitepaper/whitepaper.md
+- Protocol whitepaper (繁中): https://github.com/OptiVaults/optivaults-protocol/blob/v1/whitepaper/whitepaper-zh-TW.md
+- Protocol-level llms.txt: https://optivaults.app/llms.txt (short) · https://optivaults.app/llms-full.txt (full reference)

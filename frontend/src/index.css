@@ -1,0 +1,171 @@
+@import "tailwindcss";
+
+:root {
+  --bg-primary: #0f172a;
+  --bg-card: #1e293b;
+  --accent-cyan: #06b6d4;
+  --accent-emerald: #34d399;
+}
+
+body {
+  margin: 0;
+  background: var(--bg-primary);
+  color: #f8fafc;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Subtle radial glow — cyan/emerald only */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 25% 25%, rgba(6, 182, 212, 0.04) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(52, 211, 153, 0.03) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+#root {
+  position: relative;
+  z-index: 1;
+}
+
+/* Brand gradient text — cyan to emerald */
+.gradient-text {
+  background: linear-gradient(135deg, #06b6d4 0%, #34d399 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glass cards — deeper, more contrast */
+.glass-card {
+  background: rgba(30, 41, 59, 0.7);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.glass-card:hover {
+  border-color: rgba(6, 182, 212, 0.15);
+}
+
+/* Glow border — cyan tint */
+.glow-border {
+  box-shadow:
+    0 0 20px rgba(6, 182, 212, 0.08),
+    0 0 60px rgba(52, 211, 153, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+/* Pulse animation */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+.pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
+
+/* Smooth scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(71, 85, 105, 0.5);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(6, 182, 212, 0.5);
+}
+
+/* Button shine effect */
+.btn-shine {
+  position: relative;
+  overflow: hidden;
+}
+.btn-shine::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    to bottom right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.06) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: rotate(30deg);
+  transition: transform 0.5s;
+}
+.btn-shine:hover::after {
+  transform: rotate(30deg) translateY(-30%);
+}
+
+/* Stat card hover */
+.stat-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* Input focus ring — cyan */
+input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.3);
+}
+
+/* Selection color */
+::selection {
+  background: rgba(6, 182, 212, 0.3);
+  color: white;
+}
+
+/* v2 */
+
+/* Fade-in animation for modal overlays */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-fadeIn {
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(100%); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.animate-slide-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+/* iPhone home-indicator safe-area inset.
+ * Used by MobileTabNav (fixed bottom nav) so the 56px nav clears the
+ * device's home indicator gesture area. */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+/* Total bottom clearance for content above the fixed MobileTabNav.
+ * Combines nav height (56px / h-14) + iPhone home-indicator inset
+ * + 24px visual buffer so content doesn't touch the nav border.
+ * Single declaration so Tailwind's pb-* utilities (which sort later
+ * in the cascade) don't strip the env() inset.
+ * Desktop (md+) collapses to zero — nav is replaced by inline navbar. */
+.pb-tabnav {
+  padding-bottom: calc(56px + env(safe-area-inset-bottom, 0) + 24px);
+}
+@media (min-width: 768px) {
+  .pb-tabnav {
+    padding-bottom: 0;
+  }
+}
+

@@ -1,0 +1,4 @@
+# SPA catch-all for Cloudflare Pages
+# Cloudflare Pages serves static files automatically before _redirects
+# This catch-all only applies to non-file routes (SPA client routing)
+/*    /index.html   200

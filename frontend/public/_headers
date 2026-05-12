@@ -1,0 +1,16 @@
+# Ensure correct MIME types for static assets
+/*.png
+  Content-Type: image/png
+
+/favicon.ico
+  Content-Type: image/png
+  Cache-Control: public, max-age=3600
+
+/manifest.json
+  Content-Type: application/json
+
+# Security headers for all pages
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
