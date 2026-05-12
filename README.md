@@ -34,17 +34,17 @@ See the [OptiVaults whitepaper](https://github.com/OptiVaults/optivaults-protoco
 
 ## Repository status
 
-**V1 is a pre-launch repo.** The operator layer is still being adapted from the internal-verification-era codebase. Current state:
+**V1 is a pre-launch repo.** The operator layer is being adapted from the internal-verification-era codebase. Current state:
 
 | Component | Status | Notes |
 |-----------|--------|-------|
 | `keeper/` | 🚧 Placeholder | V1 keeper reference implementation coming post keeper-verification milestone. TypeScript, vitest-tested. |
 | `api/` | ⏳ Deferred | V1 API server adaptation pending. Read-only endpoints + TX building + WebSocket streaming. |
-| `frontend/` | ⏳ Deferred | React + Vite + TailwindCSS SPA. Cloudflare Pages deploy. |
-| `withdraw-cli/` | ⏳ Deferred | Node CLI for self-serve Withdraw (no infrastructure dependency). |
-| `emergency-withdraw/` | ⏳ Deferred | Static HTML self-serve emergency-withdraw tool. |
+| `frontend/` | ✅ Published | React 19 + Vite 8 + TailwindCSS v4 SPA. CIP-30 wallet integration, in-browser TX building via Lucid Evolution, Blockfrost direct REST, vitest tests. 7 pages with EN / zh-TW / ja i18n. Operator-specific URLs + Cloudflare Pages deploy script flagged in `frontend/README.md` for forkers. |
+| `withdraw-cli/` | ✅ Published | Node CLI for self-serve Withdraw (no infrastructure dependency). |
+| `emergency-withdraw/` | ✅ Published | Static HTML self-serve emergency-withdraw tool — in-browser, no backend dependency. |
 
-Contents will be added in batches as each component is verified V1-ready against the on-chain contracts.
+Remaining components will be added in batches as each is verified V1-ready against the on-chain contracts.
 
 ---
 
