@@ -6,7 +6,7 @@
 
 > **開發分支:`v1`。** 與姊妹 repo [`optivaults-protocol`](https://github.com/OptiVaults/optivaults-protocol) 慣例一致——**沒有 `main` 分支**。
 
-本 repo 收錄 **V1 operator 層的參考實作**——跑一個 OptiVaults V1 實例所需的鏈下程式:keeper、API server、frontend、以及 self-serve 的恢復工具。
+本 repo 收錄 **V1 operator 層的參考實作**——跑一個 OptiVaults V1 實例所需的鏈下程式：keeper、frontend（含瀏覽器內 TX 建構）、以及 self-serve 的恢復工具。
 
 它是 [`optivaults-protocol`](https://github.com/OptiVaults/optivaults-protocol) 的姊妹 repo,後者持有 Aiken 智能合約、協議規格、白皮書、與部署流程。
 
@@ -19,7 +19,7 @@ OptiVaults V1 **刻意被設計成兩個可分離的層**:
 | 層 | Repo | 是什麼 | Fee |
 |----|------|--------|-----|
 | **協議層(公共財)** | [`optivaults-protocol`](https://github.com/OptiVaults/optivaults-protocol) | Aiken validators + spec + whitepaper + 部署腳本。Apache 2.0。**任何人都能 fork 並啟動自己的 vault,完全免付費**。 | 0%——純公共財。 |
-| **Operator 層(本 repo)** | `optivaults-reference` | keeper / API / frontend / CLI 工具的 TypeScript 參考實作。Apache 2.0。在 `optivaults.app` 代使用者跑活的 vault 實例。 | 已實現收益的 4.5%(**合約硬上限**;啟動 40% 給 keeper / 60% 進 treasury——keeper 份額在 validator 硬上限以支持開源第三方 keeper 經濟可行性;費用拆分見 [economics.md](https://github.com/OptiVaults/optivaults-protocol/blob/v1/docs/economics.md))。 |
+| **Operator 層（本 repo）** | `optivaults-reference` | keeper / frontend / CLI 工具的 TypeScript 參考實作。Apache 2.0。在 `optivaults.app` 代使用者跑活的 vault 實例。 | 已實現收益的 4.5%（**合約硬上限**；啟動 40% 給 keeper / 60% 進 treasury——keeper 份額在 validator 硬上限以支持開源第三方 keeper 經濟可行性；費用拆分見 [economics.md](https://github.com/OptiVaults/optivaults-protocol/blob/v1/docs/economics.md)）。 |
 
 **為什麼要兩個 repo?** 因為這是兩個**根本不同**的東西:
 
@@ -39,8 +39,7 @@ OptiVaults V1 **刻意被設計成兩個可分離的層**:
 | 元件 | 狀態 | 備註 |
 |------|------|------|
 | `keeper/` | 🚧 Placeholder | V1 keeper 參考實作，在 keeper 驗證里程碑之後遷入。TypeScript、vitest 測試。 |
-| `api/` | ⏳ 待適配 | V1 API server。唯讀 endpoint + TX 建構 + WebSocket 串流。 |
-| `frontend/` | ✅ 已發布 | React 19 + Vite 8 + TailwindCSS v4 SPA。CIP-30 錢包整合、瀏覽器內 TX 建構（Lucid Evolution）、Blockfrost 直接 REST、vitest 測試。7 個頁面、EN / zh-TW / ja 三語 i18n。Operator-specific URL + Cloudflare Pages 部署腳本已在 `frontend/README.md` 為 forker 標註。 |
+| `frontend/` | ✅ 已發布 | React 19 + Vite 8 + TailwindCSS v4 SPA。CIP-30 錢包整合、**瀏覽器內 TX 建構（Lucid Evolution）**（無獨立 API server——原本的 `api/` 元件已併入 frontend client-side）、Blockfrost 直接 REST、vitest 測試。7 個頁面、EN / zh-TW / ja 三語 i18n。Operator-specific URL + Cloudflare Pages 部署腳本已在 `frontend/README.md` 為 forker 標註。 |
 | `withdraw-cli/` | ✅ 已發布 | Node CLI，用於 self-serve Withdraw（不依賴任何基礎設施）。 |
 | `emergency-withdraw/` | ✅ 已發布 | 靜態 HTML 的 self-serve 緊急提領工具——瀏覽器內運作、無 backend 依賴。 |
 
@@ -54,7 +53,7 @@ OptiVaults 的設計讓**任何團隊都能 fork 協議、啟動自己的 vault 
 
 1. Fork [`optivaults-protocol`](https://github.com/OptiVaults/optivaults-protocol)(或直接用已發布的 artefact)。
 2. 依 `optivaults-protocol/deploy/` 跑部署 ceremony(見 [deploy/runbooks/v1-mainnet-ceremony.md](https://github.com/OptiVaults/optivaults-protocol/blob/v1/deploy/runbooks/v1-mainnet-ceremony.md)),部署你自己的 vault 地址 + reference scripts。
-3. Fork 本 repo(`optivaults-reference`)——依你自己的 ceremony state 設定 keeper / API / frontend、部署到你想要的地方(**也可以完全不部署,只在本機跑給自己用**)。
+3. Fork 本 repo（`optivaults-reference`）——依你自己的 ceremony state 設定 keeper / frontend、部署到你想要的地方（**也可以完全不部署，只在本機跑給自己用**）。
 4. 用自己的政策運作:自己的費率、自己的治理簽名者集合、自己的存入者群體。
 
 你的實例與 OptiVaults 運營的實例**互相獨立**。兩者除了慣例(例如都遵循同一份 `optivaults-protocol` hash 集合)之外,不會互相作用。
@@ -82,7 +81,7 @@ OptiVaults 運營的實例(`optivaults.app`)由合約強制的 4.5% 績效費支
 
 所有協議層級的安全發現、合約審計、經濟模型文件、白皮書內容,都住在 [`optivaults-protocol`](https://github.com/OptiVaults/optivaults-protocol)。
 
-**本 repo 的 scope 嚴格限於鏈下 operator 實例程式**。針對 operator 基礎設施的安全揭露(keeper runtime bug、API 驗證問題、frontend XSS 向量、CLI 解析 bug)走本 repo `SECURITY.md` 的通報管道。協議層級的揭露(合約漏洞、datum 注入等)走 `optivaults-protocol/SECURITY.md`。
+**本 repo 的 scope 嚴格限於鏈下 operator 實例程式**。針對 operator 基礎設施的安全揭露（keeper runtime bug、frontend XSS / CSP 問題、CLI 解析 bug）走本 repo `SECURITY.md` 的通報管道。協議層級的揭露（合約漏洞、datum 注入等）走 `optivaults-protocol/SECURITY.md`。
 
 若你不確定發現屬於哪一層,**預設走 `optivaults-protocol` 的通報管道**——triage 流程會適當轉派。
 

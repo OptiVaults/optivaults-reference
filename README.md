@@ -6,7 +6,7 @@
 
 > **Active development branch: `v1`.** Matches the sibling [`optivaults-protocol`](https://github.com/OptiVaults/optivaults-protocol) convention — no `main` branch.
 
-This repository holds the **V1 operator-layer reference implementation** — the off-chain code needed to run an OptiVaults V1 instance: keeper, API server, frontend, and self-serve recovery tools.
+This repository holds the **V1 operator-layer reference implementation** — the off-chain code needed to run an OptiVaults V1 instance: keeper, frontend (with in-browser TX building), and self-serve recovery tools.
 
 It is the companion of [`optivaults-protocol`](https://github.com/OptiVaults/optivaults-protocol), which holds the Aiken smart contracts, protocol specification, whitepaper, and deploy pipeline.
 
@@ -19,7 +19,7 @@ OptiVaults V1 is deliberately structured as **two separable layers**:
 | Layer | Repo | What it is | Fee |
 |-------|------|-----------|-----|
 | **Protocol layer (public good)** | [`optivaults-protocol`](https://github.com/OptiVaults/optivaults-protocol) | Aiken validators + spec + whitepaper + deploy scripts. Apache 2.0. Anyone may fork and launch their own vault without paying anything. | 0% — pure public good. |
-| **Operator layer (this repo)** | `optivaults-reference` | Reference TypeScript implementation of the keeper, API, frontend, CLI tools. Apache 2.0. Runs a live vault instance on behalf of users via `optivaults.app`. | 4.5% of realised yield (hard-capped in the contract; at V1 launch 40% to keeper / 0% to gov pool / 60% to treasury; see [fee breakdown](https://github.com/OptiVaults/optivaults-protocol/blob/v1/docs/economics.md)). |
+| **Operator layer (this repo)** | `optivaults-reference` | Reference TypeScript implementation of the keeper, frontend, CLI tools. Apache 2.0. Runs a live vault instance on behalf of users via `optivaults.app`. | 4.5% of realised yield (hard-capped in the contract; at V1 launch 40% to keeper / 0% to gov pool / 60% to treasury; see [fee breakdown](https://github.com/OptiVaults/optivaults-protocol/blob/v1/docs/economics.md)). |
 
 **Why two repos?** Because these are two fundamentally different things:
 
@@ -39,8 +39,7 @@ See the [OptiVaults whitepaper](https://github.com/OptiVaults/optivaults-protoco
 | Component | Status | Notes |
 |-----------|--------|-------|
 | `keeper/` | 🚧 Placeholder | V1 keeper reference implementation coming post keeper-verification milestone. TypeScript, vitest-tested. |
-| `api/` | ⏳ Deferred | V1 API server adaptation pending. Read-only endpoints + TX building + WebSocket streaming. |
-| `frontend/` | ✅ Published | React 19 + Vite 8 + TailwindCSS v4 SPA. CIP-30 wallet integration, in-browser TX building via Lucid Evolution, Blockfrost direct REST, vitest tests. 7 pages with EN / zh-TW / ja i18n. Operator-specific URLs + Cloudflare Pages deploy script flagged in `frontend/README.md` for forkers. |
+| `frontend/` | ✅ Published | React 19 + Vite 8 + TailwindCSS v4 SPA. CIP-30 wallet integration, **in-browser TX building via Lucid Evolution** (no separate API server — the previous `api/` component has been folded into the frontend client-side), Blockfrost direct REST, vitest tests. 7 pages with EN / zh-TW / ja i18n. Operator-specific URLs + Cloudflare Pages deploy script flagged in `frontend/README.md` for forkers. |
 | `withdraw-cli/` | ✅ Published | Node CLI for self-serve Withdraw (no infrastructure dependency). |
 | `emergency-withdraw/` | ✅ Published | Static HTML self-serve emergency-withdraw tool — in-browser, no backend dependency. |
 
@@ -54,7 +53,7 @@ OptiVaults is designed so that **any team can fork the protocol and launch their
 
 1. Fork [`optivaults-protocol`](https://github.com/OptiVaults/optivaults-protocol) (or use the published artefacts as-is).
 2. Run the ceremony in `optivaults-protocol/deploy/` (see [deploy/runbooks/v1-mainnet-ceremony.md](https://github.com/OptiVaults/optivaults-protocol/blob/v1/deploy/runbooks/v1-mainnet-ceremony.md)) to deploy your own vault address + reference scripts.
-3. Fork this repo (`optivaults-reference`), configure the keeper / API / frontend against your ceremony state, deploy where you want (or don't — you can run entirely locally and skip hosted infrastructure for your own use).
+3. Fork this repo (`optivaults-reference`), configure the keeper / frontend against your ceremony state, deploy where you want (or don't — you can run entirely locally and skip hosted infrastructure for your own use).
 4. Operate under your own policy: your own fee rate, your own governance signer set, your own depositor base.
 
 Your instance is independent of the OptiVaults-operated instance. The two will never interact except by convention (e.g., both following the same `optivaults-protocol` hash set).
@@ -83,7 +82,7 @@ Hard caps enforced in the contract: `keeper_fee_bps ≤ 4000` (40%), `gov_fee_bp
 
 All protocol-level security findings, contract audits, economics documentation, and whitepaper content live in [`optivaults-protocol`](https://github.com/OptiVaults/optivaults-protocol).
 
-**This repo's scope is strictly the off-chain operator instance code.** Security disclosures specific to operator infrastructure (keeper runtime bugs, API authentication issues, frontend XSS vectors, CLI parsing bugs) go to the disclosure channels in this repo's `SECURITY.md`. Protocol-level security disclosures (contract exploits, datum injection, etc.) go to `optivaults-protocol/SECURITY.md`.
+**This repo's scope is strictly the off-chain operator instance code.** Security disclosures specific to operator infrastructure (keeper runtime bugs, frontend XSS / CSP issues, CLI parsing bugs) go to the disclosure channels in this repo's `SECURITY.md`. Protocol-level security disclosures (contract exploits, datum injection, etc.) go to `optivaults-protocol/SECURITY.md`.
 
 If you're unsure which layer a finding applies to, default to `optivaults-protocol`'s disclosure channel — the triage process will forward appropriately.
 
