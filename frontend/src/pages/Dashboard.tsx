@@ -256,8 +256,8 @@ export default function Dashboard() {
           <InfoRow label={t('dashboard.asset')} value={t('dashboard.assetValue')} icon={<IconAsset />} />
           <InfoRow label={t('dashboard.perfFee')} value={`${vault.performanceFeeBps / 100}% ${t('dashboard.onYield')}`} icon={<IconFee />} highlight subtitle={t('dashboard.perfFeeNote')} />
           <InfoRow label={t('dashboard.earlyFee')} value={`${vault.earlyWithdrawFeeBps / 100}% ${t('dashboard.earlyFeeNote')}`} icon={<IconTimer />} />
-          {/* V1 mainnet plan: 30% buffer / 25% USDM / 45% DJED (whitepaper §2.3, Phase 73). */}
-          {/* Display the mainnet-plan value here — Preprod test ceremonies may have legacy values (e.g., p23 still 35%) */}
+          {/* V1 mainnet plan: 30% buffer / 25% USDM / 45% DJED (whitepaper §2.3). */}
+          {/* Display the mainnet-plan value here — Preprod test ceremonies may carry legacy values */}
           {/* but the user-facing strategy data should reflect the V1 mainnet posture. */}
           <InfoRow label={t('dashboard.buffer')} value={`30% ${t('dashboard.idle')}`} icon={<IconShield />} />
           <InfoRow label={t('dashboard.compound')} value={t('dashboard.weekly2')} icon={<IconCompound />} />

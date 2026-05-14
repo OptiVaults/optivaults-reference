@@ -485,7 +485,7 @@ export async function buildCancelOrderTx(p: BuildCancelOrderParams): Promise<Bui
         const owner = d?.fields?.[0]
         if (typeof owner === 'string' && owner === userPkh) {
           orderUtxos.push(u)
-          // R51 anti-double-satisfaction: order_input_count == 1 in
+          // Anti-double-satisfaction: order_input_count == 1 in
           // contract Cancel branch — one TX per cancelled order.
           break
         }
@@ -502,8 +502,8 @@ export async function buildCancelOrderTx(p: BuildCancelOrderParams): Promise<Bui
   const orderUtxo = orderUtxos[0]
   const cancelRdmrCbor = await orderCancelRedeemerCbor()
 
-  // Refund full value back to the owner (R65 N-2 + contract Cancel
-  // branch's None-vault-ref full-refund path).
+  // Refund full value back to the owner via contract Cancel branch's
+  // None-vault-ref full-refund path.
   const refundAssets: Record<string, bigint> = { ...orderUtxo.assets }
 
   const refUtxos = await loadRefUtxos(state, ['order'], (refs) => lucid.utxosByOutRef(refs))

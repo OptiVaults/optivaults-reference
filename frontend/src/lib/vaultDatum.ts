@@ -2,7 +2,7 @@
  * V1 VaultDatum decoder for the frontend.
  *
  * Field order MUST mirror `contracts/lib/vault/types.ak::VaultDatum` (29
- * fields, post Phase 87 `community_sunset_triggered` insertion). Drift
+ * fields including the `community_sunset_triggered` flag). Drift
  * between this file and the on-chain enum produces silent decode
  * failures that surface as "vault not found" in the UI.
  *

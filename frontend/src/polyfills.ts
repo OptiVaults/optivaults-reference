@@ -18,7 +18,7 @@
  * any of `main.tsx`'s other static imports' bodies — including the
  * cbor-x module top-level Buffer.from calls.
  *
- * Discovered Phase 106 wrap (2026-05-02). The latent bug was masked
+ * The latent bug was masked
  * by stale-while-revalidate SW cache serving an older chunk that
  * pre-dated the script-cache import; Block 5's `clients.claim()`
  * forced open tabs onto the live bundle and exposed it.

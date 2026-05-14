@@ -11,9 +11,8 @@
  * this file and the on-chain code produces silent decode failures that
  * present as "Withdraw[N] the validator crashed" or "expected empty list".
  *
- * See `feedback_redeemer_idx_sync.md` (Phase 89) — every off-chain
- * `Constr(N, [...])` instance for a vault/gov redeemer is on this audit
- * surface, not just the typed-record table.
+ * Every off-chain `Constr(N, [...])` instance for a vault/gov redeemer
+ * is on this audit surface, not just the typed-record table.
  */
 
 let _Data: any = null
@@ -29,7 +28,7 @@ async function loadDataConstr() {
 
 // ════════════════════════════════════════════════════════════
 // VaultRedeemer Constr indices — match types.ak declaration order.
-// CommunitySunset (Phase 87) is at idx 3; everything after shifted +1.
+// CommunitySunset is at idx 3; everything after shifted +1.
 // ════════════════════════════════════════════════════════════
 
 export const REDEEMER_IDX = {

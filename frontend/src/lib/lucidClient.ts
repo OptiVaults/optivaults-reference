@@ -185,8 +185,6 @@ export async function selectWalletFromCip30(cip30Api: unknown): Promise<void> {
  * retry catches the resulting "All inputs are spent" / "already
  * included" error, treat that as success and pull the hash off the
  * signed-tx object.
- *
- * See feedback_lucid_submit_retry_already_included.md (Phase 83).
  */
 export async function submitTolerant(
   signed: { submit: () => Promise<string>; toHash?: () => string },
