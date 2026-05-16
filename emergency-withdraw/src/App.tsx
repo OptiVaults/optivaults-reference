@@ -246,13 +246,27 @@ function InfoRow({
   tone = 'default',
   mono = true,
   breakAll = true,
+  block = false,
 }: {
   label: string
   value: ReactNode
   tone?: Tone
   mono?: boolean
   breakAll?: boolean
+  block?: boolean
 }) {
+  // `block` stacks label over value — used for wide values (timestamps)
+  // that would otherwise wrap awkwardly in the right column on mobile.
+  if (block) {
+    return (
+      <div className="text-sm">
+        <div className="text-slate-400">{label}</div>
+        <div className={`mt-0.5 break-words ${mono ? 'font-mono' : ''} ${TONE_TEXT[tone]}`}>
+          {value}
+        </div>
+      </div>
+    )
+  }
   return (
     <div className="flex items-baseline justify-between gap-4 text-sm">
       <span className="text-slate-400 shrink-0">{label}</span>
@@ -827,12 +841,12 @@ export default function App() {
               <InfoRow
                 label={t('vault.lastCompound')}
                 value={fmtTime(vault.lastCompoundTime, t('vault.never'))}
-                breakAll={false}
+                block
               />
               <InfoRow
                 label={t('vault.lastRealloc')}
                 value={fmtTime(vault.lastReallocTime, t('vault.never'))}
-                breakAll={false}
+                block
               />
             </DataPanel>
 
@@ -991,7 +1005,7 @@ export default function App() {
               <InfoRow
                 label={t('sunset.lastActivity')}
                 value={fmtTime(sunset.lastActivityMs, t('vault.never'))}
-                breakAll={false}
+                block
               />
               <InfoRow
                 label={t('sunset.daysSince')}
