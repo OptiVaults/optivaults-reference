@@ -108,7 +108,7 @@ so depositors can recover their full proportional USDCx share even if the founde
 
 | Flag | Network | Vault |
 |------|---------|-------|
-| `--network preprod` (default) | Preprod testnet | bundled `config/preprod.json` (current p23 ceremony) |
+| `--network preprod` (default) | Preprod testnet | bundled `config/preprod.json` (current rc13 ceremony) |
 | `--network mainnet` | Cardano mainnet | **Placeholder — pass `--config <path>` once V1 mainnet ceremony lands** |
 
 Override the bundled config in any of three ways:

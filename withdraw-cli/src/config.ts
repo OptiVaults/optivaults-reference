@@ -12,7 +12,7 @@
  *      and `config/mainnet.json` for `--network mainnet` (resolved via
  *      `import.meta.url`, so it works after `tsup` bundling)
  *
- * The bundled `config/preprod.json` ships with the current p23 ceremony
+ * The bundled `config/preprod.json` ships with the current rc13 ceremony
  * snapshot. After a fresh ceremony the operator can either:
  *   (a) update the bundled file + republish the package, or
  *   (b) point users at a hosted JSON URL via `OPTIVAULTS_V1_CONFIG`
