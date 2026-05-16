@@ -4,14 +4,14 @@ V1 command-line self-serve withdrawal + Layer 3 dead-man-switch trigger. Runs en
 
 Currently supports **Preprod** (V1 launch-candidate ceremony). Mainnet placeholder ships unfilled — pass `--config <path>` once V1 mainnet ceremony lands.
 
-## What V1 adds vs the V9.x / V10 `withdraw-cli`
+## V1 contract surface
 
-V1 ships a different on-chain contract surface from V9.x / V10:
+This CLI targets the V1 on-chain contract surface:
 
-- **29-field VaultDatum** (vs 25 in V9). Adds `liqwid_positions`, `non_deposit_value`, `last_realloc_time`, `last_fee_update_time`, `last_ada_swap_time`, `keeper_fee_bps`, `gov_fee_bps`, `max_slippage_bps`, `min_swap_peg_bps`, and the new operational flag `community_sunset_triggered`.
-- **R55 compile-time vault NFT anchor**: `vault_nft_policy` is no longer a datum field — it's baked into `vault_proxy` / `vusdcx` / `order` at compile time. The CLI locates the vault UTXO by NFT scan at the proxy address.
-- **Withdraw redeemer signature**: `Constr(1, [shares, receiver, receiver_output_idx])` (V9 was `Constr(1, [shares, receiver])`). The third field defends against R48 M-1 anti-double-satisfaction.
-- **Withdraw-Zero routes through `vault_user`** (V9 used `vault_core`; V1 split the user-flow validators).
+- **29-field VaultDatum**, including `liqwid_positions`, `non_deposit_value`, `last_realloc_time`, `last_fee_update_time`, `last_ada_swap_time`, `keeper_fee_bps`, `gov_fee_bps`, `max_slippage_bps`, `min_swap_peg_bps`, and the operational flag `community_sunset_triggered`.
+- **Compile-time vault NFT anchor**: `vault_nft_policy` is not a datum field — it's baked into `vault_proxy` / `vusdcx` / `order` at compile time. The CLI locates the vault UTXO by NFT scan at the proxy address.
+- **Withdraw redeemer signature**: `Constr(1, [shares, receiver, receiver_output_idx])`. The third field pins which output index the receiver payout must land at, closing an output double-satisfaction gap.
+- **Withdraw-Zero routes through `vault_user`**: the user-flow validators are split, so Withdraw touches `vault_user` only.
 - **Layer 3 CommunitySunset**: a permissionless redeemer any vUSDCx holder can call after ≥90 days of operational inactivity. Sets `frozen=1 + community_sunset_triggered=1`, opening the permissionless `vault_recall.RecallFromLiqwid` + `vault_protocol.DeployToProtocol` Layer 2 paths. The CLI exposes this as `sunset-status` (read) + `sunset-trigger` (write).
 
 ## Quick start
@@ -49,7 +49,7 @@ optivaults-v1-withdraw balance \
 
 ### `quote` — estimate output
 
-Pure-math preview of a Withdraw, including R49 M-4 deferred-yield (subtract NET not BASE from `total_deposited`) and the 7-day keeper-inactive fee waiver.
+Pure-math preview of a Withdraw, including deferred-yield accounting (subtract NET not BASE from `total_deposited`) and the 7-day keeper-inactive fee waiver.
 
 ```bash
 optivaults-v1-withdraw quote \
@@ -126,7 +126,7 @@ The CLI builds V1 transactions with:
 - **Proxy spend** — vault UTXO at proxy address with `ProxyRedeemer::UseUser = Constr(0,[])`
 - **User staking withdrawal** — `withdraw(user_reward_addr, 0, Constr(1, [shares, receiver, receiver_output_idx]))`
 - **vUSDCx burn** — `mintAssets({vusdcx: -shares}, Constr(1, []))`
-- **Reference scripts** — `readFrom([vaultProxy, vaultUser, vusdcx])` (3 entries, identical to V9.x — the additional V1 staking validators are not needed for Withdraw)
+- **Reference scripts** — `readFrom([vaultProxy, vaultUser, vusdcx])` (3 entries — the additional V1 staking validators are not needed for Withdraw)
 
 CommunitySunset replaces the `withdraw` redeemer with `Constr(3, [])` and skips the burn + payout outputs (datum-only mutation, vault assets unchanged).
 

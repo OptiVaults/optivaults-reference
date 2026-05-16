@@ -2,24 +2,23 @@
  * V1 vault state query + Withdraw-Zero TX builder + CommunitySunset
  * (Layer 3 90-day dead-man-switch) TX builder.
  *
- * V1 differs from V9.x / V10:
- *   - 29-field VaultDatum (added: liqwid_positions, non_deposit_value,
+ * V1 contract surface:
+ *   - 29-field VaultDatum (liqwid_positions, non_deposit_value,
  *     last_realloc_time, last_fee_update_time, last_ada_swap_time,
  *     keeper_fee_bps, gov_fee_bps, max_slippage_bps, min_swap_peg_bps,
  *     community_sunset_triggered)
- *   - Withdraw redeemer: Constr(1, [shares, receiver, receiver_output_idx])
- *     (V9 was Constr(1, [shares, receiver]) — 2 fields; V1 added
- *     receiver_output_idx to defend against R48 M-1 anti-double-satisfaction)
- *   - Withdraw routes through `vault_user` staking validator (V9 used
- *     `vault_core`; V1 split user-flow into `vault_user` + `vault_keeper_hot`)
- *   - vault_proxy.UseUser = Constr(0, []) (was UseCore)
- *   - vault_nft_policy is a compile-time anchor (R55), not a datum field;
+ *   - Withdraw redeemer: Constr(1, [shares, receiver, receiver_output_idx]) —
+ *     receiver_output_idx pins the payout output index, defending against
+ *     output double-satisfaction
+ *   - Withdraw routes through the `vault_user` staking validator (the
+ *     user-flow validators are split into `vault_user` + `vault_keeper_hot`)
+ *   - vault_proxy.UseUser = Constr(0, [])
+ *   - vault_nft_policy is a compile-time anchor, not a datum field;
  *     vault is identified via NFT scan at proxy address
  *   - CommunitySunset = Constr(3, []) — permissionless redeemer; sets
  *     frozen=1 + community_sunset_triggered=1 after ≥90d operational inactivity
  *
- * V1 Withdraw TX structure (Withdraw-Zero pattern, identical 3 ref scripts
- * to V9):
+ * V1 Withdraw TX structure (Withdraw-Zero pattern, 3 ref scripts):
  *   - Spend vault UTXO at proxy address with ProxyRedeemer::UseUser
  *   - Withdraw 0 lovelace from `vault_user` reward address with
  *     VaultRedeemer::Withdraw(shares, receiver, receiver_output_idx)
@@ -200,9 +199,6 @@ function hexToUint8Array(hex: string): Uint8Array {
  *      letting Lucid send hex text.
  *   3. Return `{redeemer_tag, redeemer_index, ex_units}` shape that
  *      Lucid's downstream effect-ts switch expects.
- *
- * Mirrors `v1/reference/frontend/src/lib/lucidClient.ts::patchBlockfrostEvaluate`
- * + `deploy/lib/blockfrostProvider.ts::patchEval`.
  */
 function patchBlockfrostEvaluate(bf: any, baseUrl: string, key: string): void {
   bf.evaluateTx = async (tx: string, _additionalUTxOs?: unknown) => {
@@ -264,7 +260,7 @@ function patchBlockfrostEvaluate(bf: any, baseUrl: string, key: string): void {
  * missing `drep_deposit` / `gov_action_deposit` fields). Replace its
  * `getProtocolParameters` with a Conway-safe implementation that reads
  * Blockfrost REST directly + applies fallbacks. Cached per provider
- * instance. Mirrors `v1/keeper/src/agent/utils/blockfrostProtocolParamsPatch.ts`.
+ * instance.
  */
 function patchProtocolParamsConwaySafe(bf: any, url: string, key: string): void {
   let cached: any = null
@@ -353,7 +349,7 @@ export function hydrateRewardAddrs(cfg: V1Config): void {
 
 /**
  * Locate the unique vault UTXO at proxy.address by scanning for the
- * one-shot vault NFT (R55 compile-time anchor). The deploy ceremony
+ * one-shot vault NFT (compile-time anchor). The deploy ceremony
  * mints exactly one such NFT and burns the mint window deadline, so
  * there is provably one vault UTxO per proxy address.
  */
@@ -589,7 +585,7 @@ export async function buildWithdrawTx(
   // Build new datum — copy all 29 fields, mutate only accounting deltas.
   const oldDatum = Data.from(state.rawDatum) as any
   const newFields = [...(oldDatum.fields as unknown[])]
-  newFields[VF.total_deposited] = state.totalDeposited - quote.netWithdraw // R49 M-4 deferred-yield: subtract NET, not BASE
+  newFields[VF.total_deposited] = state.totalDeposited - quote.netWithdraw // deferred-yield: subtract NET, not BASE
   newFields[VF.total_shares] = state.totalShares - shares
   newFields[VF.idle_buffer] = state.idleBuffer - quote.netWithdraw
   const newDatumCbor = Data.to(new Constr(0, newFields as any) as any)

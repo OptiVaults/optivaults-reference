@@ -75,7 +75,7 @@ export interface V1Config {
 
   /// Bech32 address of the vault UTXO (lives at proxy script address).
   proxyAddr: string
-  /// Hex28 — vault NFT minting policy (R55 compile-time anchor).
+  /// Hex28 — vault NFT minting policy (compile-time anchor).
   vaultNftPolicy: string
   /// Hex — vault NFT asset name (typically "OptiVault" hex).
   vaultNftName: string

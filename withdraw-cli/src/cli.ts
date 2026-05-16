@@ -188,7 +188,7 @@ program
     const shares = BigInt(opts.shares)
     const q = computeWithdrawQuote(vault, shares)
 
-    console.log('── Withdraw Quote (V1, R49 M-4 deferred-yield) ──')
+    console.log('── Withdraw Quote (V1, deferred-yield accounting) ──')
     console.log(`  Shares to burn:       ${q.shares.toString()}`)
     console.log(`  Gross withdraw:       ${fmtMicro(q.baseWithdraw)} (deposit-token units)`)
     console.log(`  Early fee:            ${fmtMicro(q.earlyFee)} (${q.keeperInactive ? 'WAIVED — keeper inactive 7d+' : 'active'})`)
