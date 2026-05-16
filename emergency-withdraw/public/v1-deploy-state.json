@@ -1,289 +1,317 @@
 {
   "network": "Preprod",
-  "releaseTag": "v1-preprod-p23",
-  "startedAt": "2026-05-01T09:45:12.021Z",
-  "lastUpdatedAt": "2026-05-01T11:46:46.186Z",
+  "releaseTag": "v1-launch-rc13",
+  "startedAt": "2026-05-16T01:54:57.218Z",
+  "lastUpdatedAt": "2026-05-16T05:18:17.746Z",
   "mints": {
     "vaultNft": {
-      "txHash": "7407d3c2aea46629328b961e05b05634814d9935f5ca0831d8515d23e36b015b",
+      "txHash": "e8e737886f0e2000aaaed5cf89c98e3d02c7d60afbf9aa1fb55ecf3b3d2da850",
       "utxoRef": {
-        "txHash": "dcdf056029fb03b62612e59adbe089e9d43be974cac40d940cf4a65c00a4d91a",
+        "txHash": "d70894153dcc12886e489ce76fd73c04fba1ebaca64d0333ef641a052469e95b",
         "outputIndex": 0
       },
-      "policyId": "8e79858d513fa6ff3907a1385b638aa6336af1bf2925fe3c0d7a0f13",
+      "policyId": "e4337d529c2532c650494f1bd87b4d602ea17a540309f044e6123979",
       "assetName": "4f7074695661756c74"
     },
     "governanceNft": {
-      "txHash": "950eddaad20f7fd9be08d58f77917b7d8e690515a8d64d53e4d4cab7c27b07ba",
+      "txHash": "03a92f94702a6c8e3bd6818081ce40f0d04d2fe3ab79b63a6dcf8b4a05296a86",
       "utxoRef": {
-        "txHash": "67882ae59566b829f71092ca105a2ad3d2df6f4d5724e5777a1f3ba58b5d3c87",
+        "txHash": "24b56e73392441fada9518e61ad23dafa4ec4290de63091f0b0d99b5809cb831",
         "outputIndex": 0
       },
-      "policyId": "7012bf2d660f089607bb70ddbffc665a64989f0e4a4c03b2326a38c2",
+      "policyId": "10306ac615464b938e6638880b4c0516fe2726846a6a029f310b7698",
       "assetName": "4f7074695661756c74734756"
     },
     "registryAuthNft": {
-      "txHash": "894c44c214c806ad80aecaefb8a41ce486b7578a2095d45ac26e3d61b5ee8f25",
+      "txHash": "a1e4fcecf5a5aa973ad65441a82af1c72050a5ef5856f2cd4586e66b81d073c6",
       "utxoRef": {
-        "txHash": "5b52dd2584495d16b82377c9b98b2bab67bc1919d3e2c477e796bda959ff8003",
+        "txHash": "8306360fdf55313db79637655c7e87bf20a735759ccbc393e954174ac95bf718",
         "outputIndex": 0
       },
-      "policyId": "5b086d8b64a20ff142bb88bfc3f503e108eccf75acd18b2651f28dc6",
+      "policyId": "0656f78f3cdca901510a542198809abc7cae92bc7598db2a0c730808",
       "assetName": "526567697374727941757468"
     }
   },
   "refScripts": {
     "vaultProxy": {
-      "txHash": "de4d1e3ecde6a108fed0c631cc9c7e6fc1217b61deb325e61769e180b1ecf114",
+      "txHash": "e02928828096600862e68dfdc3e343363f9c741cad67da8f006f925dd18325f1",
       "outputIndex": 0,
-      "scriptHash": "37161b5ea12cbd157a0a32f8ad62bc1ecc84f7a01609c6bb3cbdb99c",
+      "scriptHash": "544a74d3389b6606974a4c2445cc11b16da823a843196cd813b4d7c2",
       "sizeBytes": 5623,
       "minAda": "38645695"
     },
     "vaultUser": {
-      "txHash": "3d488cf9d3a0b9baa26a721a89a93e08b8460705f3ca1e5d5d271faf164e3a94",
+      "txHash": "a2bee75b25261c51a0acc14dc38846a50eb2c29f00dbb941daa3018960bcd2d5",
       "outputIndex": 0,
-      "scriptHash": "c15a080e90244db0dbc72b1b3c5393c05489d15712c5e0e7c47c102e",
+      "scriptHash": "25262305a55e671a0573c108a5567cce3eb75ef06ffb126b4a611527",
       "sizeBytes": 12972,
       "minAda": "86156980"
     },
     "vaultKeeperHot": {
-      "txHash": "251c5d386e3f86eb38489217ecbf85c29b45e53251b976c9d69c33e9801561c6",
+      "txHash": "c4fe5c21a2f4f33040fc32739e5f427d90f09c35c631b069aa01c8765832e3fe",
       "outputIndex": 0,
-      "scriptHash": "09b5aba28525d8f11bdeed14de199899805cb3bf2d35ae208fff21a3",
+      "scriptHash": "f30823ea9cd2c8c42b1da4c9703bfe030a7329291d1bf19f0ff801e0",
       "sizeBytes": 12697,
       "minAda": "84379105"
     },
     "vaultBatcher": {
-      "txHash": "7189d862e06fdbb72f9c59f72f04b845ef9948ee06453ba058fc3f53c7779d14",
+      "txHash": "f3f4b35ec5a0cc3214e60f79b57c641bcfcea695587e99a0267fb849db92047c",
       "outputIndex": 0,
-      "scriptHash": "93744be46d9157df6dc4877495b1b3a3279deeba4bb1eb2156b514f4",
+      "scriptHash": "036363826227fd25a9ec95ef031bea3a9ce514bb252cef690d0a02f3",
       "sizeBytes": 11807,
       "minAda": "78625255"
     },
     "vaultSwapAda": {
-      "txHash": "9ffe892470333b25f68dfc6eb708cdfad6a9d2ee119c2057b7ac87a664433173",
+      "txHash": "d01a608acb65404238492aea07dac097d95446d2f6dbb479fd5103c9e178be91",
       "outputIndex": 0,
-      "scriptHash": "6c3d656905432a890ef7aa42bd7b0fe9574b12b1207eafa9fb5a96f1",
-      "sizeBytes": 12419,
-      "minAda": "82581835"
+      "scriptHash": "3b0f0af9bcffc8fc42e7d03d1dd06d84403e7e1f4af410ab161798a7",
+      "sizeBytes": 12418,
+      "minAda": "82575370"
     },
     "vaultProtocol": {
-      "txHash": "6abd41e42e053731325d87476193d7560c0c90e62b7d2ab9974fb4a3d41d62cd",
+      "txHash": "7492ba3f533af02419c1ea67514b139044b13d678c808c48232d9151e22c6818",
       "outputIndex": 0,
-      "scriptHash": "f0d55e0912fac41c2eeb57b0d509b9435c00e9f4a4097d79c2646a43",
-      "sizeBytes": 13780,
-      "minAda": "91380700"
+      "scriptHash": "2a8cb5eb479b120dee2fc33c8f90145b27c259aba82f0a46c49895d7",
+      "sizeBytes": 14342,
+      "minAda": "95014030"
     },
     "vaultRecall": {
-      "txHash": "16069cdf820fc6cab70d6ce85f5d10792f19d06c0d5d25982e77555742ee2f66",
+      "txHash": "a23f57f15b6ed6c0c17a6b97f56ca338d8b444a87f4b8a462976f524156caef1",
       "outputIndex": 0,
-      "scriptHash": "2bd2258bbc025a4f6e7d10eb631340b90d0a7e5bd72c60f00b4e5d9b",
+      "scriptHash": "015bf144f2df5e4d4a977a8e05e582b18b3542080465036dfbee75a4",
       "sizeBytes": 13701,
       "minAda": "90869965"
     },
     "vaultLiqwid": {
-      "txHash": "a0647b278ad344da75a2c8004eb0d52251e783a5994016bf25203e016faf1a3f",
+      "txHash": "8761195f249ec65911e749a62d4314d08c74c6031fa2a2c06f5d3840d117f387",
       "outputIndex": 0,
-      "scriptHash": "070edd9bc276a9695032968ec3c88a404c56c900dfae21514af7e2d4",
+      "scriptHash": "212ab84a1e21b36ecd92445eda0b5c31c7eece0434d98b8e04ef7e69",
       "sizeBytes": 13694,
       "minAda": "90824710"
     },
     "vaultGovPolicy": {
-      "txHash": "956a7340cdae3f464beeb6cb3b84daf810d8e22f669105fd57bcd574c3cad27b",
+      "txHash": "5c69fe1547830a055c7ac2614bbf2f594a8ab1a23832dcf08daa9a77e90650b9",
       "outputIndex": 0,
-      "scriptHash": "f7461de78274915768cacb51bf004cc72b17f7282902a4f59077ae6f",
+      "scriptHash": "86f215ac841f32769417d328238c047f17581eb28afdc91aca4df498",
       "sizeBytes": 12892,
       "minAda": "85639780"
     },
     "vaultGovEmergency": {
-      "txHash": "87d1f07d8e0efa9bba358433de4f00b8b158f6ac4029929b9509ec53f0f783ac",
+      "txHash": "36155afab7187eb3f0ec6e49b120e81a7e18d5b2625d8e1b7d30abaf30b26dd5",
       "outputIndex": 0,
-      "scriptHash": "f6de7fbcea8f222db76de403e4e9b10e42da85db9c16e15c1c701e27",
+      "scriptHash": "6051ccb2c29681f99c073fd7f4dd3c8691730fe71da427b147c8c289",
       "sizeBytes": 10819,
       "minAda": "72237835"
     },
     "vaultAdminDeploy": {
-      "txHash": "530ba11bfe6512522962b363e64f53f31f770b43654545a9ed89c76530c97ca9",
+      "txHash": "9d407e5bc2d7caeb80bff9979dc0b3f1317d299e3d83c58a23c662013ddbc8d8",
       "outputIndex": 0,
-      "scriptHash": "1f1be34ab85aa936a2893b9efa48fbc3c4d15426e37447502c6a0503",
-      "sizeBytes": 13689,
-      "minAda": "90792385"
+      "scriptHash": "ddbe6d69cb9131bc8761b84e565a7d799b00bc373bfea195d3c1de4e",
+      "sizeBytes": 14248,
+      "minAda": "94406320"
     },
     "keeperStakeScript": {
-      "txHash": "e3c4569aa495c8e792c75b340dc67c2892fdc36d98920ef32e5ba0a6596eb7ab",
+      "txHash": "2bba955e009514e4926fa7eadc7e43615f11bc1b1731634af7da173cac6e45d7",
       "outputIndex": 0,
-      "scriptHash": "6187e668f557169447e28b5db128bbfe75aa5ba609e641eae1ec57df",
+      "scriptHash": "7960ccf60e0795c93aee1cf86abc76e85d8684ebefb27a62c6aa0506",
       "sizeBytes": 8830,
       "minAda": "59378950"
     },
     "treasury": {
-      "txHash": "678f1ae64aea6c82d9cd2f72caa213f4369f8f61731c40770a6a8939dbf4a55f",
+      "txHash": "01082ade71fb3e9e498f45a4fa32725360f57fddd69b3977cefa5d6f787d40f5",
       "outputIndex": 0,
-      "scriptHash": "afbf47389711c35ce8597232167245f65aa6156b60de38264c706753",
+      "scriptHash": "c63e6b3804a79aa78bf09a71a39f72ce998804c694f41d38b9862025",
       "sizeBytes": 9902,
       "minAda": "66309430"
     },
     "multisigGov": {
-      "txHash": "43f7a02be38f1e43af3da3f2975f8d09cea756c990466c272df660d1f4422c79",
+      "txHash": "1551abee32cf8c101f6d96ee24018fa385cf71157f97410617f3794c30ce5a5b",
       "outputIndex": 0,
-      "scriptHash": "84597cbd8cb9a93bd7ab58e37806b54f7c9b50c743a15c2312af722a",
-      "sizeBytes": 8370,
-      "minAda": "56405050"
+      "scriptHash": "40368df5e5ec168330926e481312ce5f240aab13ea7e3dcf883835b2",
+      "sizeBytes": 8500,
+      "minAda": "57245500"
     },
     "registry": {
-      "txHash": "f51e92309a0188f3028a0e07a69db7f04f517b281f4fda4577db5168d8728175",
+      "txHash": "c5077ee9b5445f271330770808cbb1c79e693f7d80d4ff3ec762749eb2311c35",
       "outputIndex": 0,
       "scriptHash": "bcebca717f23e10e8bdb00fc6588443f5b7561f95503211474bb9d69",
       "sizeBytes": 8504,
       "minAda": "57271360"
     },
     "order": {
-      "txHash": "f91e1e463069fbba9c4ef27da5008f4c83086d7c0cce5088d6afc886e1924a52",
+      "txHash": "a1684eafe2210ef2e71fc55cd5a43385ea479cd49d149cbb44d93986415198b6",
       "outputIndex": 0,
-      "scriptHash": "6d0167371ad998b5268a79656d15d377fb04538e7336fbe1240692e5",
+      "scriptHash": "cd89437b77ed5233aa73215b0a74393d639457e8d59c677da7b224a2",
       "sizeBytes": 3885,
       "minAda": "27409525"
     },
     "vusdcx": {
-      "txHash": "3c35e4bc886c1d7d750bd3a13cbfe954a04b32c0196e7dc8c2fc41316e37aa33",
+      "txHash": "07100d51947b889b5ddb1de3b5f993296e19cd122408ccc48467d126adf62103",
       "outputIndex": 0,
-      "scriptHash": "3fc7c21c87c70ac15957c553b13458e36bdf75dc32f4d4baf70e688b",
+      "scriptHash": "6512811fc7d7df95a82033b69a1bf634d11ec6f52c628742968e8672",
       "sizeBytes": 1338,
       "minAda": "10943170"
     },
     "minswapV2Adapter": {
-      "txHash": "d2c8cdaa4044ad9c7de1804c8acb14ab219f6c10e0942f013a24a68164261b5e",
+      "txHash": "72f0e9dcb984dea3c4e5044810b004da6028a9205bf9c9a34a00824e22ebd328",
       "outputIndex": 0,
-      "scriptHash": "ba920c221c033f14726b2a15e85e263333911d69990e8028b7c5b740",
-      "sizeBytes": 5348,
-      "minAda": "36867820"
+      "scriptHash": "f9300264fb7eeaf50464ea96d40da7718e2d216b1aaa514b038a8d4d",
+      "sizeBytes": 6313,
+      "minAda": "43106545"
+    },
+    "sundaeswapCancelGuard": {
+      "txHash": "cbe7593a30e6937ccf5dbcf274f1a255050f3346c128ef1d66683ae886d20415",
+      "outputIndex": 0,
+      "scriptHash": "bff755b23afe3ac14cd2e30a0803572f79fa0b4e21bfc75a5621a423",
+      "sizeBytes": 6150,
+      "minAda": "42052750"
+    },
+    "sundaeswapAdapter": {
+      "txHash": "267c28d45caae6a9632d0302b79b028e554b3dc34ae406e3b9c8d620bdc736c7",
+      "outputIndex": 0,
+      "scriptHash": "60ea46e1bda83f928c01c2d83f291bc74332ea78fba2743a2091663d",
+      "sizeBytes": 5966,
+      "minAda": "40863190"
     }
   },
   "stateUtxos": {
     "registry": {
-      "txHash": "b17ea04aa06a783cd248a18c050339e84c0e1c3e6392093520dc1836237fc1d8",
-      "outputIndex": 0,
+      "txHash": "5acde34e13e2d3f9acc975a1af3f80b63727914fa5c6d76b1b025addadf93c2e",
+      "outputIndex": 1,
       "address": "addr_test1wz7whjn30u37zr5tmvq0cevggsl4katpl92sxgg5wjae66guqdc0n"
     },
     "treasury": {
-      "txHash": "8146109c44b38f95b803ad376adacd851f7789b62a97840a9105f87cff67d668",
+      "txHash": "48354f7899bb531b97e18d16992c9858575235afe7eba5e6e566ce86ca5f5b1e",
       "outputIndex": 0,
-      "address": "addr_test1wzhm73ecjuguxh8gt9ery9njghm94fs4ddsduwpxf3cxw5czdg0zy"
+      "address": "addr_test1wrrru6ecqjne4fut7zd8rgulwt8fnzqyc620g8fchxrzqfgpwk6j5"
     },
     "keeperAuth": {
-      "txHash": "d6bfe3877c89503787fa30c29b30095ea2739cdeb43849476bb91cdc0611a35b",
+      "txHash": "3716259a56f5eec69184e807537508fb3cb81e2d0043d77a26eea61b3940b860",
       "outputIndex": 0,
-      "address": "addr_test1wpsc0eng74t3d9z8u294mvfgh0l8t2jm5cy7vs02u8k90hcm7gg9q"
+      "address": "addr_test1wpukpn8kpcretjf6acw0s64uwm59mp5ya0hmy7nzc64q2psqxuwmr"
     },
     "governance": {
-      "txHash": "3cb95a007035ef04fa5b9d94d6f523f545c63b1d0d48a40908f1f1075ddbf159",
+      "txHash": "b70fb4d323bd0342a5462fb182f7cbb2003c3c4219f2877b89f3f6f1fc0989fe",
       "outputIndex": 0,
-      "address": "addr_test1wzz9jl9a3ju6jw7h4dvwx7qxk48hex6scap6zhprz2hhy2s8s64h5"
+      "address": "addr_test1wpqrdr04uhkpdqesjfhysycjee0jgz4tz048u0w03qurtvsxm05qy"
     },
     "vault": {
-      "txHash": "15a8d535f2c33abe41035e3446e8962a7313919c0a5c7e5b0afaf380e2ff66d8",
+      "txHash": "25d18c7c0c14267adbc55d8d80a727e9179d6ec8c54e56fd10cbe62d6a2251e0",
       "outputIndex": 0,
-      "address": "addr_test1wqm3vx675ykt69t6pge03ttzhs0vep8h5qtqn34m8j7mn8qnpjfzn"
+      "address": "addr_test1wp2y5axn8zdkvp5hffxzg3wvzxckm2pr4pp3jmxczw6d0ssqqc973"
     }
   },
   "stakeRegistrations": {
     "vaultUser": {
       "target": "vaultUser",
-      "rewardAddr": "stake_test17rq45zqwjqjymvxmcu43k0znj0q9fzw32ufvtc88c37pqtss9h0ng",
-      "stakeHash": "c15a080e90244db0dbc72b1b3c5393c05489d15712c5e0e7c47c102e",
-      "txHash": "39301cd5a8568031b30396916be2dbc7523471b0f9bbb869b5a00663478f8332"
+      "rewardAddr": "stake_test17qjjvgc9540xwxs9w0qs3f2k0n8rad677phlkyntffs32fcf3wg0m",
+      "stakeHash": "25262305a55e671a0573c108a5567cce3eb75ef06ffb126b4a611527",
+      "txHash": "158edc714331f12d360396f58fad02f06fa6630b676b7d90ad545a16b387cda8"
     },
     "vaultKeeperHot": {
       "target": "vaultKeeperHot",
-      "rewardAddr": "stake_test17qymt2azs5ja3ugmmmk3fhsenzvcqh9nhukntt3q3lljrgc4kw7ew",
-      "stakeHash": "09b5aba28525d8f11bdeed14de199899805cb3bf2d35ae208fff21a3",
-      "txHash": "325b475d6b3d0470e8fb137f1084de60ecea1634617732a778a4db08c8207c2f"
+      "rewardAddr": "stake_test17ressgl2nnfv33ptrkjvjupmlcps5uef9yw3huvlpluqrcqa2kvqc",
+      "stakeHash": "f30823ea9cd2c8c42b1da4c9703bfe030a7329291d1bf19f0ff801e0",
+      "txHash": "ccab5e31efd237697d667b7251997269ac81b707abee4c869cc1840b12743957"
     },
     "vaultBatcher": {
       "target": "vaultBatcher",
-      "rewardAddr": "stake_test17zfhgjlydkg40hmdcjrhf9d3kw3j080whf9mr6ep2663faq30qs8t",
-      "stakeHash": "93744be46d9157df6dc4877495b1b3a3279deeba4bb1eb2156b514f4",
-      "txHash": "f043f9169ff7b68c6d36b6b49453bbb7e0686c720272b668e28614a97c7614f4"
+      "rewardAddr": "stake_test17qpkxcuzvgnl6fdfaj277qcmagafeeg5hvjjemmfp59q9uc72e8g7",
+      "stakeHash": "036363826227fd25a9ec95ef031bea3a9ce514bb252cef690d0a02f3",
+      "txHash": "3c32e1f56b1802cea4929703a0a7e90da075244fa3b32a6793504162f1f9e69e"
     },
     "vaultSwapAda": {
       "target": "vaultSwapAda",
-      "rewardAddr": "stake_test17pkr6etfq4pj4zgw774y90tmpl54wjcjkys8ataflddfdug7qn2aw",
-      "stakeHash": "6c3d656905432a890ef7aa42bd7b0fe9574b12b1207eafa9fb5a96f1",
-      "txHash": "c740e82a9ef72c963818f2443ab901b04c12bca515c814e7781db1af6cdf14aa"
+      "rewardAddr": "stake_test17qas7zhehnlu3lzzulgr68wsdkzyq0n7ra90gy9tzcte3fcrkmhqj",
+      "stakeHash": "3b0f0af9bcffc8fc42e7d03d1dd06d84403e7e1f4af410ab161798a7",
+      "txHash": "7697fd0b4c56df2c135fa280d23891b984698757129535012f6571de2283cc93"
     },
     "vaultProtocol": {
       "target": "vaultProtocol",
-      "rewardAddr": "stake_test17rcd2hsfztavg8pwadtmp4gfh9p4cq8f7jjqjltecfjx5sc28gr0s",
-      "stakeHash": "f0d55e0912fac41c2eeb57b0d509b9435c00e9f4a4097d79c2646a43",
-      "txHash": "774c30f0c427baeef700bc36fc878a9593a5364c37278e980b2f8ed73dd75037"
+      "rewardAddr": "stake_test17q4ged0tg7d3yr0w9lpnerusz3dj0sje4w5z7zjxcjvft4c5x0jzt",
+      "stakeHash": "2a8cb5eb479b120dee2fc33c8f90145b27c259aba82f0a46c49895d7",
+      "txHash": "abef90becd70bedd95db98ea898a3b3a632d53b7455e36fc3227ad70ef685a9e"
     },
     "vaultRecall": {
       "target": "vaultRecall",
-      "rewardAddr": "stake_test17q4ayfvthsp95nmw05gwkccngzus6zn7t0tjcc8spd89mxcnjxdsm",
-      "stakeHash": "2bd2258bbc025a4f6e7d10eb631340b90d0a7e5bd72c60f00b4e5d9b",
-      "txHash": "8a85df221327cf3c11f91f6273540d3e94fb0baf0d81cbff4aefd51b8d77991b"
+      "rewardAddr": "stake_test17qq4hu2y7t04un22jaagup09s2cckd2zpqzx2qmdl0h8tfqg07kpc",
+      "stakeHash": "015bf144f2df5e4d4a977a8e05e582b18b3542080465036dfbee75a4",
+      "txHash": "a1aaf34ca2b4ea82ed3bec4fc06f18eb9ce0d5041c9deed2e8774badcb7f1aa8"
     },
     "vaultLiqwid": {
       "target": "vaultLiqwid",
-      "rewardAddr": "stake_test17qrsahvmcfm2j62sx2tgas7g3fqyc4kfqr06ug23ftm794qenl4uc",
-      "stakeHash": "070edd9bc276a9695032968ec3c88a404c56c900dfae21514af7e2d4",
-      "txHash": "94302e181019d12b94c9b4cf30285f4b4dd07885362b5cc75c1853c1711460ee"
+      "rewardAddr": "stake_test17qsj4wz2rcsmxmkdjfz9aksttscu0mkwqs6dnzuwqnhhu6g69h985",
+      "stakeHash": "212ab84a1e21b36ecd92445eda0b5c31c7eece0434d98b8e04ef7e69",
+      "txHash": "d97fa9940325e47d8d02ec8e7f9c9ce803d7dc6fd8513ef4405b82bf69f59a89"
     },
     "vaultGovPolicy": {
       "target": "vaultGovPolicy",
-      "rewardAddr": "stake_test17rm5v808sf6fz4mget94r0cqfnrjk9lh9q5s9f84jpm6umc4p5dzq",
-      "stakeHash": "f7461de78274915768cacb51bf004cc72b17f7282902a4f59077ae6f",
-      "txHash": "74905b7e17263e86724a7dfbf9943263b302a7b87541ed478e959eae42e7d396"
+      "rewardAddr": "stake_test17zr0y9dvss0nya55zlfjsguvq3l3wkq7k290mjg6efxlfxq7p9e9r",
+      "stakeHash": "86f215ac841f32769417d328238c047f17581eb28afdc91aca4df498",
+      "txHash": "28a76843fc2deb29c1efcba837d0a1a2aaf029c53d3006d4e1a2844b381e15da"
     },
     "vaultGovEmergency": {
       "target": "vaultGovEmergency",
-      "rewardAddr": "stake_test17rmdulaua28jytdhdhjq8e8fky8y9k59mwwpdc2ur3cpufcsr2tuz",
-      "stakeHash": "f6de7fbcea8f222db76de403e4e9b10e42da85db9c16e15c1c701e27",
-      "txHash": "ffdcdea4c3df6c628da6dd3e4e9eea529538908df4dc903a93718010750b12e2"
+      "rewardAddr": "stake_test17ps9rn9jc2tgr7vuqula0axa8jrfzuc0uuw6gfa3glyv9zg93fhvt",
+      "stakeHash": "6051ccb2c29681f99c073fd7f4dd3c8691730fe71da427b147c8c289",
+      "txHash": "4bd414dfd86f72d1165379c9e572cba62859bdc861c7a1987acbc82e0b7f3a0f"
     },
     "vaultAdminDeploy": {
       "target": "vaultAdminDeploy",
-      "rewardAddr": "stake_test17q03hc62hpd2jd4z3yaea7jgl0puf525ym3hg36s934q2qclq4w58",
-      "stakeHash": "1f1be34ab85aa936a2893b9efa48fbc3c4d15426e37447502c6a0503",
-      "txHash": "d18970e815dd861ca872e3e1bceb8a1830e44f2347ec8f81264be740d400d2f6"
+      "rewardAddr": "stake_test17rwmumtfewgnr0y8vxuyu4j604uekq9uxualagv460qauns08n2jk",
+      "stakeHash": "ddbe6d69cb9131bc8761b84e565a7d799b00bc373bfea195d3c1de4e",
+      "txHash": "caff58c8716b6db6e310d0456b5d6e133f403a77e2663f2b383e768ec3ca1c25"
     },
     "keeperStakeScript": {
       "target": "keeperStakeScript",
-      "rewardAddr": "stake_test17psc0eng74t3d9z8u294mvfgh0l8t2jm5cy7vs02u8k90hcmkksj2",
-      "stakeHash": "6187e668f557169447e28b5db128bbfe75aa5ba609e641eae1ec57df",
-      "txHash": "71a2c261241dbdff39bc1cb8f672a509b21a5a44fafc73c96f4ca001490fa2f5"
+      "rewardAddr": "stake_test17pukpn8kpcretjf6acw0s64uwm59mp5ya0hmy7nzc64q2psqwzkvf",
+      "stakeHash": "7960ccf60e0795c93aee1cf86abc76e85d8684ebefb27a62c6aa0506",
+      "txHash": "794cf8e234535172ff2f1aaa3cf45a948fc6b7c602121de78d190fb2f018f916"
     },
     "minswapV2Adapter": {
       "target": "minswapV2Adapter",
-      "rewardAddr": "stake_test17zafyrpzrspn79rjdv4pt6z7ycen8ygadxvsaqpgklzmwsqshexng",
-      "stakeHash": "ba920c221c033f14726b2a15e85e263333911d69990e8028b7c5b740",
-      "txHash": "preexisting"
+      "rewardAddr": "stake_test17runqqnyldlw4agyvn4fd4qd5accutfpdvd2552tqw9g6ng8t4mdz",
+      "stakeHash": "f9300264fb7eeaf50464ea96d40da7718e2d216b1aaa514b038a8d4d",
+      "txHash": "dde976045d46048de362b2dda4ea91743c56db36c1ad12e3b7a513121f852705"
+    },
+    "sundaeswapCancelGuard": {
+      "target": "sundaeswapCancelGuard",
+      "rewardAddr": "stake_test17zllw4dj8tlr4s2v6t3s5zqr2uhhn7stfcsml3662cs6ggcaxqdfy",
+      "stakeHash": "bff755b23afe3ac14cd2e30a0803572f79fa0b4e21bfc75a5621a423",
+      "txHash": "20b80f6bc94e80480ecc102644bc2c81cdc3518bfa13a6d7910b7750b9c24338"
+    },
+    "sundaeswapAdapter": {
+      "target": "sundaeswapAdapter",
+      "rewardAddr": "stake_test17psw53hphk5rly5vq8pds0efr0r5xvh20ra6yap6yzgkv0gy4grfq",
+      "stakeHash": "60ea46e1bda83f928c01c2d83f291bc74332ea78fba2743a2091663d",
+      "txHash": "f34fc31addddb194ed165c249b21ef0dea682d64c6c46af867871d51a8affdcb"
     }
   },
   "hashes": {
-    "vaultNftPolicy": "8e79858d513fa6ff3907a1385b638aa6336af1bf2925fe3c0d7a0f13",
-    "governanceNftPolicy": "7012bf2d660f089607bb70ddbffc665a64989f0e4a4c03b2326a38c2",
-    "registryAuthPolicy": "5b086d8b64a20ff142bb88bfc3f503e108eccf75acd18b2651f28dc6",
-    "keeperStakeHash": "6187e668f557169447e28b5db128bbfe75aa5ba609e641eae1ec57df",
-    "treasuryHash": "afbf47389711c35ce8597232167245f65aa6156b60de38264c706753",
-    "userStakeHash": "c15a080e90244db0dbc72b1b3c5393c05489d15712c5e0e7c47c102e",
-    "keeperHotStakeHash": "09b5aba28525d8f11bdeed14de199899805cb3bf2d35ae208fff21a3",
-    "batcherStakeHash": "93744be46d9157df6dc4877495b1b3a3279deeba4bb1eb2156b514f4",
-    "swapAdaStakeHash": "6c3d656905432a890ef7aa42bd7b0fe9574b12b1207eafa9fb5a96f1",
-    "protocolStakeHash": "f0d55e0912fac41c2eeb57b0d509b9435c00e9f4a4097d79c2646a43",
-    "recallStakeHash": "2bd2258bbc025a4f6e7d10eb631340b90d0a7e5bd72c60f00b4e5d9b",
-    "liqwidStakeHash": "070edd9bc276a9695032968ec3c88a404c56c900dfae21514af7e2d4",
-    "govPolicyStakeHash": "f7461de78274915768cacb51bf004cc72b17f7282902a4f59077ae6f",
-    "govEmergencyStakeHash": "f6de7fbcea8f222db76de403e4e9b10e42da85db9c16e15c1c701e27",
-    "adminDeployStakeHash": "1f1be34ab85aa936a2893b9efa48fbc3c4d15426e37447502c6a0503",
-    "vaultProxyHash": "37161b5ea12cbd157a0a32f8ad62bc1ecc84f7a01609c6bb3cbdb99c",
-    "orderScriptHash": "6d0167371ad998b5268a79656d15d377fb04538e7336fbe1240692e5",
-    "vusdcxPolicy": "3fc7c21c87c70ac15957c553b13458e36bdf75dc32f4d4baf70e688b",
-    "multisigGovHash": "84597cbd8cb9a93bd7ab58e37806b54f7c9b50c743a15c2312af722a",
+    "vaultNftPolicy": "e4337d529c2532c650494f1bd87b4d602ea17a540309f044e6123979",
+    "governanceNftPolicy": "10306ac615464b938e6638880b4c0516fe2726846a6a029f310b7698",
+    "registryAuthPolicy": "0656f78f3cdca901510a542198809abc7cae92bc7598db2a0c730808",
+    "keeperStakeHash": "7960ccf60e0795c93aee1cf86abc76e85d8684ebefb27a62c6aa0506",
+    "treasuryHash": "c63e6b3804a79aa78bf09a71a39f72ce998804c694f41d38b9862025",
+    "userStakeHash": "25262305a55e671a0573c108a5567cce3eb75ef06ffb126b4a611527",
+    "keeperHotStakeHash": "f30823ea9cd2c8c42b1da4c9703bfe030a7329291d1bf19f0ff801e0",
+    "batcherStakeHash": "036363826227fd25a9ec95ef031bea3a9ce514bb252cef690d0a02f3",
+    "swapAdaStakeHash": "3b0f0af9bcffc8fc42e7d03d1dd06d84403e7e1f4af410ab161798a7",
+    "protocolStakeHash": "2a8cb5eb479b120dee2fc33c8f90145b27c259aba82f0a46c49895d7",
+    "recallStakeHash": "015bf144f2df5e4d4a977a8e05e582b18b3542080465036dfbee75a4",
+    "liqwidStakeHash": "212ab84a1e21b36ecd92445eda0b5c31c7eece0434d98b8e04ef7e69",
+    "govPolicyStakeHash": "86f215ac841f32769417d328238c047f17581eb28afdc91aca4df498",
+    "govEmergencyStakeHash": "6051ccb2c29681f99c073fd7f4dd3c8691730fe71da427b147c8c289",
+    "adminDeployStakeHash": "ddbe6d69cb9131bc8761b84e565a7d799b00bc373bfea195d3c1de4e",
+    "vaultProxyHash": "544a74d3389b6606974a4c2445cc11b16da823a843196cd813b4d7c2",
+    "orderScriptHash": "cd89437b77ed5233aa73215b0a74393d639457e8d59c677da7b224a2",
+    "vusdcxPolicy": "6512811fc7d7df95a82033b69a1bf634d11ec6f52c628742968e8672",
+    "multisigGovHash": "40368df5e5ec168330926e481312ce5f240aab13ea7e3dcf883835b2",
     "registryHash": "bcebca717f23e10e8bdb00fc6588443f5b7561f95503211474bb9d69",
     "governanceNftName": "4f7074695661756c74734756",
     "registryAuthName": "526567697374727941757468",
-    "minswapV2AdapterHash": "ba920c221c033f14726b2a15e85e263333911d69990e8028b7c5b740"
+    "minswapV2AdapterHash": "f9300264fb7eeaf50464ea96d40da7718e2d216b1aaa514b038a8d4d",
+    "sundaeswapAdapterHash": "60ea46e1bda83f928c01c2d83f291bc74332ea78fba2743a2091663d",
+    "sundaeswapCancelGuardHash": "bff755b23afe3ac14cd2e30a0803572f79fa0b4e21bfc75a5621a423"
   }
 }

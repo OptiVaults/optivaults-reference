@@ -15,7 +15,7 @@
  *   - CommunitySunset redeemer = Constr(3, []) — permissionless after ≥90d
  *   - vault_proxy.UseUser = Constr(0, [])
  *   - 3 ref scripts (vaultProxy + vaultUser + vusdcx)
- *   - Vault NFT scan at proxy address (R55 compile-time anchor)
+ *   - Vault NFT scan at proxy address (compile-time anchor)
  */
 
 import type { LucidEvolution, UTxO } from '@lucid-evolution/lucid'
@@ -168,6 +168,10 @@ function patchProtocolParamsConwaySafe(bf: any, url: string, key: string): void 
       throw new Error(`Blockfrost protocol-params returned non-JSON: ${text.slice(0, 100)}`)
     }
     const r = JSON.parse(text) as any
+    // Fallback: convert a named-key cost_models object to positional form.
+    // Blockfrost lists the parameters in canonical Plutus order, so positions
+    // follow iteration (insertion) order — sorting the names would scramble
+    // them and corrupt the script-integrity hash.
     const normalizeCostModels = (raw: any): any => {
       if (!raw || typeof raw !== 'object') return raw
       const out: any = {}
@@ -176,7 +180,6 @@ function patchProtocolParamsConwaySafe(bf: any, url: string, key: string): void 
         const entries = Object.entries(paramObj as Record<string, number>)
         const allNumeric = entries.every(([k]) => /^\d+$/.test(k))
         if (allNumeric) { out[version] = paramObj; continue }
-        entries.sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
         const positional: Record<string, number> = {}
         entries.forEach(([_n, val], idx) => { positional[String(idx)] = val })
         out[version] = positional
@@ -200,7 +203,10 @@ function patchProtocolParamsConwaySafe(bf: any, url: string, key: string): void 
       collateralPercentage: parseInt(r.collateral_percent ?? '150'),
       maxCollateralInputs: parseInt(r.max_collateral_inputs ?? '3'),
       minFeeRefScriptCostPerByte: parseInt(r.min_fee_ref_script_cost_per_byte ?? '15'),
-      costModels: normalizeCostModels(r.cost_models),
+      // `cost_models_raw` is Blockfrost's positional array form, already in
+      // canonical Plutus order — required for a correct script-integrity hash
+      // (and thus tx submission). Fall back to the named object if absent.
+      costModels: r.cost_models_raw ?? normalizeCostModels(r.cost_models),
     }
     return cached
   }

@@ -4,21 +4,21 @@ Self-serve withdrawal + Layer 3 dead-man-switch trigger for OptiVaults V1 deposi
 
 V1 introduces a permissionless 90-day **CommunitySunset** redeemer that any vUSDCx holder can trigger after extended operational inactivity. This tool surfaces both the routine partial-Withdraw flow and the dead-man-switch trigger in a single self-contained page.
 
-## What V1 adds vs the V9.x / V10 emergency-withdraw
+## V1 contract surface
 
-V1 ships a different on-chain contract surface from V9.x / V10:
+This page targets the V1 on-chain contract surface:
 
-- **29-field VaultDatum** (vs 25 in V9). Adds `liqwid_positions`, `non_deposit_value`, `last_realloc_time`, `last_fee_update_time`, `last_ada_swap_time`, `keeper_fee_bps`, `gov_fee_bps`, `max_slippage_bps`, `min_swap_peg_bps`, and the operational flag `community_sunset_triggered`.
-- **R55 compile-time vault NFT anchor**: `vault_nft_policy` is no longer a datum field — it's baked into `vault_proxy` / `vusdcx` / `order` at compile time. The page locates the vault UTXO by NFT scan at the proxy address.
-- **Withdraw redeemer signature**: `Constr(1, [shares, receiver, receiver_output_idx])` (V9 was `Constr(1, [shares, receiver])`). The third field defends against R48 M-1 anti-double-satisfaction.
-- **Withdraw-Zero routes through `vault_user`** (V9 used `vault_core`; V1 split the user-flow validators).
+- **29-field VaultDatum**, including `liqwid_positions`, `non_deposit_value`, `last_realloc_time`, `last_fee_update_time`, `last_ada_swap_time`, `keeper_fee_bps`, `gov_fee_bps`, `max_slippage_bps`, `min_swap_peg_bps`, and the operational flag `community_sunset_triggered`.
+- **Compile-time vault NFT anchor**: `vault_nft_policy` is not a datum field — it's baked into `vault_proxy` / `vusdcx` / `order` at compile time. The page locates the vault UTXO by NFT scan at the proxy address.
+- **Withdraw redeemer signature**: `Constr(1, [shares, receiver, receiver_output_idx])`. The third field pins which output index the receiver payout must land at, closing an output double-satisfaction gap.
+- **Withdraw-Zero routes through `vault_user`**: the user-flow validators are split, so Withdraw touches `vault_user` only.
 - **Layer 3 CommunitySunset**: a permissionless redeemer any vUSDCx holder can call after ≥90 days of operational inactivity. Sets `frozen=1 + community_sunset_triggered=1`, opening the permissionless `vault_recall.RecallFromLiqwid` + `vault_protocol.DeployToProtocol` Layer 2 paths so depositors can recover their full proportional USDCx share even if the founder + governance + keeper have all failed.
 
 ## Trust model
 
 | Layer | Who you trust |
 |---|---|
-| Smart contract | OptiVaults V1 contract code on Cardano (open source, multiple rounds of internal audit, external Q2-Q3 2027 audit pending — Withdraw-Zero pattern + R55 compile-time Vault NFT anchor + V1 Layer 3 governance safety) |
+| Smart contract | OptiVaults V1 contract code on Cardano (open source, multiple rounds of internal audit, external audit pending — Withdraw-Zero pattern + compile-time Vault NFT anchor + V1 Layer 3 governance safety) |
 | Vault identity | One-shot Vault NFT minted at deploy ceremony — the validator script hashes physically encode the real NFT policy, and the page verifies the target vault UTXO holds that NFT before building the TX |
 | Withdrawal logic | This static React/Vite SPA — open source, ~700 lines of withdrawal logic in `lib/` plus the React UI (English / 繁體中文 / 日本語 i18n) |
 | Chain query | Blockfrost (your own API key) |
@@ -30,7 +30,7 @@ V1 ships a different on-chain contract surface from V9.x / V10:
 
 The page detects the network from the loaded ceremony JSON's `network` field, then validates the user's Blockfrost key prefix and CIP-30 wallet network ID against it. Mismatched keys / wallets are rejected at the connect step.
 
-V1 currently runs on **Preprod only** (release `v1-preprod-p23`). Mainnet deploy lands when V1 ceremony is performed.
+V1 currently runs on **Preprod only** (release `v1-launch-rc13`). Mainnet deploy lands when V1 ceremony is performed.
 
 ## Languages
 
