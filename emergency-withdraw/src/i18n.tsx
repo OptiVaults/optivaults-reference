@@ -99,6 +99,9 @@ const translations: Record<Lang, Translations> = {
       liqwid: 'Liqwid positions',
       never: 'never',
       na: 'n/a',
+      loadFailedTitle: 'Could not load the vault',
+      loadFailedBody: 'Connected — but the vault state could not be read from Cardano. This is usually a temporary Blockfrost hiccup or a stale deploy-state. Check the message above, then retry.',
+      retry: 'Retry',
     },
     wd: {
       step: 'Step 2',
@@ -274,6 +277,9 @@ const translations: Record<Lang, Translations> = {
       liqwid: 'Liqwid 部位',
       never: '從未',
       na: '不適用',
+      loadFailedTitle: '無法載入金庫',
+      loadFailedBody: '已連線,但無法從 Cardano 讀取金庫狀態。通常是 Blockfrost 暫時性問題,或部署狀態過期。請參考上方訊息後再重試。',
+      retry: '重試',
     },
     wd: {
       step: '步驟 2',
@@ -449,6 +455,9 @@ const translations: Record<Lang, Translations> = {
       liqwid: 'Liqwid ポジション',
       never: 'なし',
       na: '該当なし',
+      loadFailedTitle: 'ヴォールトを読み込めませんでした',
+      loadFailedBody: '接続済みですが、Cardano からヴォールト状態を読み取れませんでした。多くは Blockfrost の一時的な不具合か、デプロイ状態が古いことが原因です。上のメッセージを確認してから再試行してください。',
+      retry: '再試行',
     },
     wd: {
       step: 'ステップ 2',

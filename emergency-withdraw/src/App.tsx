@@ -121,7 +121,7 @@ function renderRich(s: string, codeClass = 'text-cyan-300'): ReactNode {
   return s.split(/(`[^`]+`|\*[^*]+\*)/g).map((part, i) => {
     if (part.length > 1 && part.startsWith('`') && part.endsWith('`')) {
       return (
-        <code key={i} className={`font-mono ${codeClass}`}>
+        <code key={i} className={`font-mono break-words ${codeClass}`}>
           {part.slice(1, -1)}
         </code>
       )
@@ -245,16 +245,22 @@ function InfoRow({
   value,
   tone = 'default',
   mono = true,
+  breakAll = true,
 }: {
   label: string
   value: ReactNode
   tone?: Tone
   mono?: boolean
+  breakAll?: boolean
 }) {
   return (
     <div className="flex items-baseline justify-between gap-4 text-sm">
       <span className="text-slate-400 shrink-0">{label}</span>
-      <span className={`text-right break-all ${mono ? 'font-mono' : ''} ${TONE_TEXT[tone]}`}>
+      <span
+        className={`text-right ${breakAll ? 'break-all' : 'break-words'} ${
+          mono ? 'font-mono' : ''
+        } ${TONE_TEXT[tone]}`}
+      >
         {value}
       </span>
     </div>
@@ -289,6 +295,7 @@ function SectionCard({
   accent = 'cyan',
   action,
   danger,
+  id,
   children,
 }: {
   title: string
@@ -297,6 +304,7 @@ function SectionCard({
   accent?: 'cyan' | 'emerald' | 'amber' | 'slate'
   action?: ReactNode
   danger?: boolean
+  id?: string
   children: ReactNode
 }) {
   const text = {
@@ -313,6 +321,7 @@ function SectionCard({
   }[accent]
   return (
     <section
+      id={id}
       className={`glass-card glow-border rounded-2xl sm:rounded-3xl p-5 sm:p-6 md:p-7 space-y-4 sm:space-y-5 ${
         danger ? 'danger' : ''
       }`}
@@ -365,6 +374,7 @@ export default function App() {
   const [txHash, setTxHash] = useState('')
   const [sharesInput, setSharesInput] = useState('')
   const [sunsetConfirmOpen, setSunsetConfirmOpen] = useState(false)
+  const justConnectedRef = useRef(false)
 
   // ── Bootstrap: load config + wallet list ──
   useEffect(() => {
@@ -383,6 +393,17 @@ export default function App() {
       cancelled = true
     }
   }, [])
+
+  // After a fresh connect, scroll the vault section into view on mobile.
+  useEffect(() => {
+    if (!vault || !justConnectedRef.current) return
+    justConnectedRef.current = false
+    if (typeof window !== 'undefined' && window.innerWidth < 640) {
+      document
+        .getElementById('vault-section')
+        ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [vault])
 
   // ── Connect flow ──
   async function handleConnect() {
@@ -428,6 +449,7 @@ export default function App() {
       setLucid(ld)
       setWalletAddr(addr)
       setNetworkResolved(resolvedNet)
+      justConnectedRef.current = true
       setStatus({ kind: 'ok', text: t('st.connected') })
       await loadOnChainState(ld, resolvedNet)
     } catch (e) {
@@ -723,9 +745,31 @@ export default function App() {
           </div>
         )}
 
+        {/* ── Vault load failed (connected but state unreadable) ── */}
+        {lucid && !vault && (
+          <SectionCard
+            title={t('vault.loadFailedTitle')}
+            eyebrow={t('vault.eyebrow')}
+            iconPath={ICON.alert}
+            accent="amber"
+          >
+            <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
+              {t('vault.loadFailedBody')}
+            </p>
+            <button
+              onClick={handleRefresh}
+              disabled={busy}
+              className="btn-shine w-full bg-gradient-to-r from-amber-500 to-cyan-500 hover:from-amber-400 hover:to-cyan-400 active:scale-[0.99] disabled:from-slate-600 disabled:to-slate-600 disabled:cursor-not-allowed text-slate-950 font-bold py-3 rounded-xl transition-all"
+            >
+              {busy ? t('wd.btnBusy') : t('vault.retry')}
+            </button>
+          </SectionCard>
+        )}
+
         {/* ── Vault State ── */}
         {lucid && vault && (
           <SectionCard
+            id="vault-section"
             title={t('vault.title')}
             eyebrow={t('vault.eyebrow')}
             iconPath={ICON.vault}
@@ -783,10 +827,12 @@ export default function App() {
               <InfoRow
                 label={t('vault.lastCompound')}
                 value={fmtTime(vault.lastCompoundTime, t('vault.never'))}
+                breakAll={false}
               />
               <InfoRow
                 label={t('vault.lastRealloc')}
                 value={fmtTime(vault.lastReallocTime, t('vault.never'))}
+                breakAll={false}
               />
             </DataPanel>
 
@@ -945,6 +991,7 @@ export default function App() {
               <InfoRow
                 label={t('sunset.lastActivity')}
                 value={fmtTime(sunset.lastActivityMs, t('vault.never'))}
+                breakAll={false}
               />
               <InfoRow
                 label={t('sunset.daysSince')}
