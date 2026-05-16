@@ -41,7 +41,7 @@ OptiVaults V1 **刻意被設計成兩個可分離的層**:
 | `keeper/` | 🚧 Placeholder | V1 keeper 參考實作，在 keeper 驗證里程碑之後遷入。TypeScript、vitest 測試。 |
 | `frontend/` | ✅ 已發布 | React 19 + Vite 8 + TailwindCSS v4 SPA。CIP-30 錢包整合、**瀏覽器內 TX 建構（Lucid Evolution）**（無獨立 API server——原本的 `api/` 元件已併入 frontend client-side）、Blockfrost 直接 REST、vitest 測試。7 個頁面、EN / zh-TW / ja 三語 i18n。Operator-specific URL + Cloudflare Pages 部署腳本已在 `frontend/README.md` 為 forker 標註。 |
 | `withdraw-cli/` | ✅ 已發布 | Node CLI，用於 self-serve Withdraw（不依賴任何基礎設施）。 |
-| `emergency-withdraw/` | ✅ 已發布 | 靜態 HTML 的 self-serve 緊急提領工具——瀏覽器內運作、無 backend 依賴。 |
+| `emergency-withdraw/` | ✅ 已發布 | 靜態 HTML 的 self-serve 緊急提領工具——瀏覽器內運作、無 backend 依賴。English / zh-TW / ja 三語 i18n。 |
 
 剩餘元件會在驗證為 V1-ready 後分批遷入。
 

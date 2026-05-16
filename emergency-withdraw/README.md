@@ -20,7 +20,7 @@ V1 ships a different on-chain contract surface from V9.x / V10:
 |---|---|
 | Smart contract | OptiVaults V1 contract code on Cardano (open source, multiple rounds of internal audit, external Q2-Q3 2027 audit pending — Withdraw-Zero pattern + R55 compile-time Vault NFT anchor + V1 Layer 3 governance safety) |
 | Vault identity | One-shot Vault NFT minted at deploy ceremony — the validator script hashes physically encode the real NFT policy, and the page verifies the target vault UTXO holds that NFT before building the TX |
-| Withdrawal logic | This static React/Vite SPA (open source, ~700 lines logic + 700 lines UI) |
+| Withdrawal logic | This static React/Vite SPA — open source, ~700 lines of withdrawal logic in `lib/` plus the React UI (English / 繁體中文 / 日本語 i18n) |
 | Chain query | Blockfrost (your own API key) |
 | Deploy state | A `v1-deploy-state.json` ceremony file (operator-published, but you can swap it via `?config=<url>` query param) |
 | TX signing | Your CIP-30 wallet extension |
@@ -32,11 +32,15 @@ The page detects the network from the loaded ceremony JSON's `network` field, th
 
 V1 currently runs on **Preprod only** (release `v1-preprod-p23`). Mainnet deploy lands when V1 ceremony is performed.
 
+## Languages
+
+The UI ships in English, 繁體中文, and 日本語 — switch via the globe selector in the header. The choice is saved to `localStorage`, and on first visit it follows the browser language. All translations are bundled into the page (no network fetch), so they work in an offline-saved copy too.
+
 ## Usage
 
 ### Option A — online (operator-hosted)
 
-Visit the operator's URL (e.g. `https://emergency.optivaults.app` once published).
+Visit the operator's URL: <https://emergency.optivaults.app>.
 
 ### Option B — offline (recommended for worst-case)
 
@@ -80,14 +84,24 @@ Useful if you've forked the contract for your own instance and want to share an 
 ## Development
 
 ```bash
-cd v1/reference/emergency-withdraw
-npm install
+cd emergency-withdraw
+npm ci           # reproducible install from package-lock.json (npm install also works)
 npm run dev      # vite dev server on :5173
 npm run build    # outputs dist/ (Buffer polyfill auto-injected post-build)
 npm run preview  # serve dist/ locally
 ```
 
 The build outputs a multi-file dist (HTML + JS chunks + WASM). For true single-file offline mode, run the build then drag `dist/index.html` into a browser; modern browsers inline assets automatically when saving "Webpage HTML Only".
+
+## Deployment
+
+The page is a static SPA, so any static host works. The OptiVaults-operated instance is published to GitHub Pages straight from this repo:
+
+- [`.github/workflows/deploy-emergency-withdraw.yml`](../.github/workflows/deploy-emergency-withdraw.yml) builds the SPA on every push to `v1` that touches `emergency-withdraw/`, then publishes `dist/` via `actions/deploy-pages`.
+- `public/CNAME` carries the custom domain `emergency.optivaults.app`. The site is served from the domain root, so Vite's default `base` (`/`) is left unchanged.
+- One-time repo setup: **Settings → Pages → Source → "GitHub Actions"**, plus a DNS `CNAME` record `emergency` → `optivaults.github.io`.
+
+Forking your own instance: repoint `public/CNAME` at your domain, or delete it and serve from the `*.github.io` project URL (set Vite `base` to match the sub-path), or drop the built `dist/` on any other static host.
 
 ## License
 

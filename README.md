@@ -41,7 +41,7 @@ See the [OptiVaults whitepaper](https://github.com/OptiVaults/optivaults-protoco
 | `keeper/` | 🚧 Placeholder | V1 keeper reference implementation coming post keeper-verification milestone. TypeScript, vitest-tested. |
 | `frontend/` | ✅ Published | React 19 + Vite 8 + TailwindCSS v4 SPA. CIP-30 wallet integration, **in-browser TX building via Lucid Evolution** (no separate API server — the previous `api/` component has been folded into the frontend client-side), Blockfrost direct REST, vitest tests. 7 pages with EN / zh-TW / ja i18n. Operator-specific URLs + Cloudflare Pages deploy script flagged in `frontend/README.md` for forkers. |
 | `withdraw-cli/` | ✅ Published | Node CLI for self-serve Withdraw (no infrastructure dependency). |
-| `emergency-withdraw/` | ✅ Published | Static HTML self-serve emergency-withdraw tool — in-browser, no backend dependency. |
+| `emergency-withdraw/` | ✅ Published | Static HTML self-serve emergency-withdraw tool — in-browser, no backend dependency. English / zh-TW / ja i18n. |
 
 Remaining components will be added in batches as each is verified V1-ready against the on-chain contracts.
 
