@@ -44,10 +44,10 @@ jobs:
         working-directory: emergency-withdraw
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           # Vite 8 requires Node 20.19+ / 22.12+; 22 is the current LTS.
           node-version: '22'
