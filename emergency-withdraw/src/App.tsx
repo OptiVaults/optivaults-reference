@@ -1,23 +1,27 @@
 /**
  * V1 Emergency Withdraw — single-page UI.
  *
- * Three sections:
- *   1. Connect — Blockfrost API key + CIP-30 wallet picker
- *   2. Vault state + Withdraw — partial Withdraw with R49 M-4 deferred-yield quote
- *   3. Layer 3 CommunitySunset — 90d dead-man-switch countdown + trigger
- *      (always rendered, but clearly marked with state: not-available /
- *      countdown-visible / available-now / already-triggered)
+ * Sections (all on one page; no router):
+ *   1. Header — brand, language toggle, ceremony context, trust strip
+ *   2. "Before you start" safety brief (shown until connected)
+ *   3. Connect — Blockfrost API key + CIP-30 wallet
+ *   4. Vault State — live 29-field VaultDatum + your position
+ *   5. Withdraw — partial Withdraw-Zero with deferred-yield quote
+ *   6. Layer 3 CommunitySunset — 90d dead-man-switch countdown + trigger
+ *   7. Reference — how it works, scope & limits
+ *   8. Footer — links + offline-backup guidance
  *
- * Visual style aligns with v1 frontend (`vault.optivaults.app`):
- *   - slate-900 bg + slate-800 glass cards
- *   - cyan→emerald gradient text + glow borders
- *   - amber accent for sunset section
+ * Visual style aligns with the v1 frontend (vault.optivaults.app):
+ * slate glass cards, cyan→emerald gradient, amber for the Layer 3
+ * danger surface. UI primitives (InfoRow / SectionCard / …) and the
+ * i18n table are kept local — this page must stay one self-contained
+ * bundle so a browser-saved copy is a working offline recovery surface
+ * in any of the supported languages.
  *
- * Self-contained: all logic in this file + `lib/{config,vault}.ts`.
- * No router, no shared components — small enough that an offline-saved
- * page is the recovery surface even if optivaults.app is down.
+ * Self-contained: all logic in this file + lib/{config,vault}.ts +
+ * i18n.tsx. No router, no cross-package shared components.
  */
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef, type ReactNode } from 'react'
 import {
   loadV1Config,
   type V1Config,
@@ -34,6 +38,7 @@ import {
   type SunsetStatus,
 } from './lib/vault'
 import type { LucidEvolution } from '@lucid-evolution/lucid'
+import { useI18n, LANG_NAMES, type Lang } from './i18n'
 
 type Cip30Api = any
 type StatusKind = 'info' | 'ok' | 'error'
@@ -50,9 +55,13 @@ function fmtMicro(n: bigint, dec: bigint = DECIMALS): string {
   return (neg ? '-' : '') + Number(head).toLocaleString() + '.' + tail
 }
 
-function fmtTime(ms: bigint): string {
-  if (ms <= 0n) return 'never'
+function fmtTime(ms: bigint, never: string): string {
+  if (ms <= 0n) return never
   return new Date(Number(ms)).toISOString().replace('T', ' ').slice(0, 19) + ' UTC'
+}
+
+function short(s: string): string {
+  return s.length > 24 ? `${s.slice(0, 12)}…${s.slice(-6)}` : s
 }
 
 function listCardanoWallets(): string[] {
@@ -68,7 +77,239 @@ function explorerUrl(network: 'mainnet' | 'preprod', txHash: string): string {
     : `https://cardanoscan.io/transaction/${txHash}`
 }
 
+/**
+ * Render a translated string with light inline markup:
+ *   `code`   → <code>
+ *   *strong* → <strong>
+ * Translations carry the markers so every language stays styled.
+ */
+function renderRich(s: string, codeClass = 'text-cyan-300'): ReactNode {
+  return s.split(/(`[^`]+`|\*[^*]+\*)/g).map((part, i) => {
+    if (part.length > 1 && part.startsWith('`') && part.endsWith('`')) {
+      return (
+        <code key={i} className={`font-mono ${codeClass}`}>
+          {part.slice(1, -1)}
+        </code>
+      )
+    }
+    if (part.length > 1 && part.startsWith('*') && part.endsWith('*')) {
+      return (
+        <strong key={i} className="text-slate-200">
+          {part.slice(1, -1)}
+        </strong>
+      )
+    }
+    return part
+  })
+}
+
+// ─────────────────────────────────────────────────────────────────
+// UI primitives — kept local so the page stays a single offline bundle
+// ─────────────────────────────────────────────────────────────────
+
+/** Stroke icon. Multiple sub-paths joined with `|`. */
+function Svg({ d, className = 'w-5 h-5' }: { d: string; className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      {d.split('|').map((seg, i) => (
+        <path key={i} d={seg} />
+      ))}
+    </svg>
+  )
+}
+
+const ICON = {
+  link: 'M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1|M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1',
+  vault: 'M5 11h14v10H5z|M8 11V7a4 4 0 0 1 8 0v4',
+  download: 'M12 3v12|M7 10l5 5 5-5|M5 21h14',
+  alert: 'M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z|M12 9v4|M12 17h.01',
+  refresh: 'M21 12a9 9 0 1 1-2.64-6.36|M21 3v6h-6',
+  check: 'M20 6 9 17l-5-5',
+  external: 'M15 3h6v6|M10 14 21 3|M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6',
+  book: 'M4 19.5A2.5 2.5 0 0 1 6.5 17H20|M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z',
+  shield: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z',
+  globe: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z|M2 12h20|M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z',
+} as const
+
+function GitHubMark({ className = 'w-4 h-4' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+    </svg>
+  )
+}
+
+/** Language picker — globe button + dropdown (closes on outside click). */
+function LangToggle() {
+  const { lang, setLang, t } = useI18n()
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    const onDown = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', onDown)
+    return () => document.removeEventListener('mousedown', onDown)
+  }, [open])
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="flex items-center justify-center w-9 h-9 rounded-lg border border-slate-700 bg-slate-800/50 text-slate-400 hover:border-cyan-500/40 hover:text-white transition-colors"
+        title={t('lang.label')}
+        aria-label={t('lang.label')}
+      >
+        <Svg d={ICON.globe} className="w-[18px] h-[18px]" />
+      </button>
+      {open && (
+        <div className="absolute right-0 mt-2 w-36 rounded-xl border border-slate-700 bg-slate-800/95 backdrop-blur-lg shadow-xl overflow-hidden py-1 z-50">
+          {(Object.keys(LANG_NAMES) as Lang[]).map((l) => (
+            <button
+              key={l}
+              onClick={() => {
+                setLang(l)
+                setOpen(false)
+              }}
+              className={`w-full text-left px-3.5 py-2 text-xs transition-colors ${
+                lang === l
+                  ? 'bg-cyan-500/20 text-cyan-400 font-semibold'
+                  : 'text-slate-300 hover:bg-slate-700/60'
+              }`}
+            >
+              {LANG_NAMES[l]}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+type Tone = 'default' | 'good' | 'warn' | 'bad' | 'accent'
+const TONE_TEXT: Record<Tone, string> = {
+  default: 'text-slate-100',
+  good: 'text-emerald-400',
+  warn: 'text-amber-400',
+  bad: 'text-red-400',
+  accent: 'text-cyan-400',
+}
+
+/** Label / value row — mirrors the frontend's InfoRow. */
+function InfoRow({
+  label,
+  value,
+  tone = 'default',
+  mono = true,
+}: {
+  label: string
+  value: ReactNode
+  tone?: Tone
+  mono?: boolean
+}) {
+  return (
+    <div className="flex items-baseline justify-between gap-4 text-sm">
+      <span className="text-slate-400 shrink-0">{label}</span>
+      <span className={`text-right break-all ${mono ? 'font-mono' : ''} ${TONE_TEXT[tone]}`}>
+        {value}
+      </span>
+    </div>
+  )
+}
+
+/** Rounded context badge — Network / Release / Vault. */
+function Pill({
+  label,
+  value,
+  tone = 'accent',
+}: {
+  label: string
+  value: string
+  tone?: 'accent' | 'good' | 'warn'
+}) {
+  const dot = { accent: 'bg-cyan-400', good: 'bg-emerald-400', warn: 'bg-amber-400' }[tone]
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-700/70 bg-slate-800/40 px-2.5 py-1 text-xs">
+      <span className={`w-1.5 h-1.5 rounded-full ${dot}`} />
+      <span className="text-slate-500">{label}</span>
+      <span className="font-mono text-slate-300">{value}</span>
+    </span>
+  )
+}
+
+/** Glass section with an icon-chip header and optional right-side action. */
+function SectionCard({
+  title,
+  eyebrow,
+  iconPath,
+  accent = 'cyan',
+  action,
+  danger,
+  children,
+}: {
+  title: string
+  eyebrow?: string
+  iconPath: string
+  accent?: 'cyan' | 'emerald' | 'amber' | 'slate'
+  action?: ReactNode
+  danger?: boolean
+  children: ReactNode
+}) {
+  const text = {
+    cyan: 'text-cyan-400',
+    emerald: 'text-emerald-400',
+    amber: 'text-amber-400',
+    slate: 'text-slate-300',
+  }[accent]
+  const chipBg = {
+    cyan: 'bg-cyan-500/10',
+    emerald: 'bg-emerald-500/10',
+    amber: 'bg-amber-500/10',
+    slate: 'bg-slate-500/10',
+  }[accent]
+  return (
+    <section
+      className={`glass-card glow-border rounded-2xl sm:rounded-3xl p-5 sm:p-6 md:p-7 space-y-4 sm:space-y-5 ${
+        danger ? 'danger' : ''
+      }`}
+    >
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <span className={`shrink-0 flex items-center justify-center w-9 h-9 rounded-xl ${chipBg} ${text}`}>
+            <Svg d={iconPath} />
+          </span>
+          <div className="min-w-0">
+            {eyebrow && (
+              <div className="text-[10px] uppercase tracking-[0.18em] text-slate-500">{eyebrow}</div>
+            )}
+            <h2 className={`text-base sm:text-lg font-bold ${text}`}>{title}</h2>
+          </div>
+        </div>
+        {action && <div className="shrink-0">{action}</div>}
+      </div>
+      {children}
+    </section>
+  )
+}
+
+/** Inset data panel — the `bg-slate-900/70` sub-block used in the frontend. */
+function DataPanel({ children, className = '' }: { children: ReactNode; className?: string }) {
+  return <div className={`bg-slate-900/60 rounded-xl p-4 sm:p-5 ${className}`}>{children}</div>
+}
+
 export default function App() {
+  const { t } = useI18n()
+
   // ── Config + connection ──
   const [config, setConfig] = useState<V1Config | null>(null)
   const [configError, setConfigError] = useState<string | null>(null)
@@ -113,7 +354,7 @@ export default function App() {
   async function handleConnect() {
     setStatus(null)
     if (!config) {
-      setStatus({ kind: 'error', text: 'Deploy state not loaded' })
+      setStatus({ kind: 'error', text: t('st.noConfig') })
       return
     }
     const key = bfKey.trim()
@@ -121,31 +362,31 @@ export default function App() {
     if (key.startsWith('preprod')) resolvedNet = 'preprod'
     else if (key.startsWith('mainnet')) resolvedNet = 'mainnet'
     else {
-      setStatus({ kind: 'error', text: 'Blockfrost key must start with "preprod" or "mainnet"' })
+      setStatus({ kind: 'error', text: t('st.keyPrefix') })
       return
     }
     if (config.network === 'Mainnet' && resolvedNet !== 'mainnet') {
-      setStatus({ kind: 'error', text: `Loaded ceremony is Mainnet but key is ${resolvedNet}` })
+      setStatus({ kind: 'error', text: t('st.netMainnet', { key: resolvedNet }) })
       return
     }
     if (config.network === 'Preprod' && resolvedNet !== 'preprod') {
-      setStatus({ kind: 'error', text: `Loaded ceremony is Preprod but key is ${resolvedNet}` })
+      setStatus({ kind: 'error', text: t('st.netPreprod', { key: resolvedNet }) })
       return
     }
     if (!walletName) {
-      setStatus({ kind: 'error', text: 'Select a wallet' })
+      setStatus({ kind: 'error', text: t('st.selectWallet') })
       return
     }
     setBusy(true)
-    setStatus({ kind: 'info', text: 'Connecting…' })
+    setStatus({ kind: 'info', text: t('st.connecting') })
     try {
       const apiFn = (window as any).cardano?.[walletName]
-      if (!apiFn) throw new Error(`Wallet not found: ${walletName}`)
+      if (!apiFn) throw new Error(t('st.walletNotFound', { name: walletName }))
       const api: Cip30Api = await apiFn.enable()
       const networkId = await api.getNetworkId()
       const expected = resolvedNet === 'mainnet' ? 1 : 0
       if (networkId !== expected) {
-        throw new Error(`Wallet on wrong network — switch to ${resolvedNet}`)
+        throw new Error(t('st.wrongNetwork', { net: resolvedNet }))
       }
       const ld = await initLucid(key, resolvedNet)
       ld.selectWallet.fromAPI(api)
@@ -153,7 +394,7 @@ export default function App() {
       setLucid(ld)
       setWalletAddr(addr)
       setNetworkResolved(resolvedNet)
-      setStatus({ kind: 'ok', text: 'Connected' })
+      setStatus({ kind: 'ok', text: t('st.connected') })
       await loadOnChainState(ld, resolvedNet)
     } catch (e) {
       setStatus({ kind: 'error', text: (e as Error).message })
@@ -164,7 +405,7 @@ export default function App() {
 
   async function loadOnChainState(ld: LucidEvolution, _net: 'mainnet' | 'preprod') {
     if (!config) return
-    setStatus({ kind: 'info', text: 'Loading vault state…' })
+    setStatus({ kind: 'info', text: t('st.loadingVault') })
     try {
       const [v, s, addr] = await Promise.all([
         queryVaultState(ld, config),
@@ -175,7 +416,7 @@ export default function App() {
       setVault(v)
       setUserShares(s)
       setSunset(computeSunsetStatus(v))
-      setStatus({ kind: 'ok', text: 'Ready' })
+      setStatus({ kind: 'ok', text: t('st.ready') })
     } catch (e) {
       setStatus({ kind: 'error', text: (e as Error).message })
     }
@@ -210,30 +451,28 @@ export default function App() {
     }
   })()
 
-  function setMaxShares() {
+  function setSharesPct(pct: number) {
     if (!vault) return
     const cap = vault.totalShares - 1n
-    const max = userShares > cap ? cap : userShares
-    setSharesInput(max.toString())
+    const base = userShares > cap ? cap : userShares
+    const v = pct >= 100 ? base : (base * BigInt(pct)) / 100n
+    setSharesInput(v.toString())
   }
 
   async function handleWithdraw() {
     if (!lucid || !config || !vault || !networkResolved || !sharesValid) return
-    if (!confirm(`Burn ${sharesParsed.toString()} vUSDCx and withdraw. Continue?`)) return
+    if (!confirm(t('wd.confirmNative', { n: sharesParsed.toString() }))) return
     setBusy(true)
     setTxHash('')
-    setStatus({ kind: 'info', text: 'Building Withdraw TX…' })
+    setStatus({ kind: 'info', text: t('st.buildingWd') })
     try {
       const { cbor, quote: q } = await buildWithdrawTx(lucid, config, vault, sharesParsed, walletAddr)
-      setStatus({ kind: 'info', text: 'Sign in your wallet…' })
+      setStatus({ kind: 'info', text: t('st.signWallet') })
       const signed = await lucid.fromTx(cbor).sign.withWallet().complete()
-      setStatus({ kind: 'info', text: 'Submitting…' })
+      setStatus({ kind: 'info', text: t('st.submitting') })
       const hash = await signed.submit()
       setTxHash(hash)
-      setStatus({
-        kind: 'ok',
-        text: `Submitted — receiving ${fmtMicro(q.netWithdraw)} (deposit-token units)`,
-      })
+      setStatus({ kind: 'ok', text: t('st.submitted', { amt: fmtMicro(q.netWithdraw) }) })
       setSharesInput('')
       // Refresh state
       setTimeout(() => loadOnChainState(lucid, networkResolved), 5_000)
@@ -251,18 +490,15 @@ export default function App() {
     setSunsetConfirmOpen(false)
     setBusy(true)
     setTxHash('')
-    setStatus({ kind: 'info', text: 'Building CommunitySunset TX…' })
+    setStatus({ kind: 'info', text: t('st.buildingSunset') })
     try {
       const { cbor } = await buildSunsetTx(lucid, config, vault, walletAddr)
-      setStatus({ kind: 'info', text: 'Sign in your wallet…' })
+      setStatus({ kind: 'info', text: t('st.signWallet') })
       const signed = await lucid.fromTx(cbor).sign.withWallet().complete()
-      setStatus({ kind: 'info', text: 'Submitting…' })
+      setStatus({ kind: 'info', text: t('st.submitting') })
       const hash = await signed.submit()
       setTxHash(hash)
-      setStatus({
-        kind: 'ok',
-        text: 'Layer 3 dead-man-switch triggered. Permissionless recovery paths are now open.',
-      })
+      setStatus({ kind: 'ok', text: t('st.sunsetDone') })
       setTimeout(() => loadOnChainState(lucid, networkResolved), 5_000)
     } catch (e) {
       setStatus({ kind: 'error', text: (e as Error).message.slice(0, 400) })
@@ -271,21 +507,21 @@ export default function App() {
     }
   }
 
-  // ── Render ──
+  // ── Render: error / loading gates ──
   if (configError) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6">
-        <div className="glass-card glow-border rounded-2xl p-8 max-w-2xl">
-          <h1 className="text-2xl font-bold text-red-400 mb-3">⚠ Failed to load deploy state</h1>
-          <p className="text-slate-300 text-sm mb-4 break-all font-mono bg-slate-900/70 p-3 rounded-lg">
+        <div className="glass-card glow-border rounded-2xl sm:rounded-3xl p-6 sm:p-8 max-w-2xl space-y-4">
+          <div className="flex items-center gap-3">
+            <span className="flex items-center justify-center w-10 h-10 rounded-xl bg-red-500/10 text-red-400">
+              <Svg d={ICON.alert} />
+            </span>
+            <h1 className="text-xl sm:text-2xl font-bold text-red-400">{t('err.title')}</h1>
+          </div>
+          <p className="text-slate-300 text-xs sm:text-sm break-all font-mono bg-slate-900/70 p-3 rounded-lg">
             {configError}
           </p>
-          <p className="text-slate-400 text-sm">
-            The page expects a ceremony JSON at <code className="text-cyan-400">/v1-deploy-state.json</code>.
-            Operators publish it alongside this static HTML; users on a self-hosted copy
-            can pass <code className="text-cyan-400">?config=&lt;url&gt;</code> to point
-            at a hosted JSON.
-          </p>
+          <p className="text-slate-400 text-sm leading-relaxed">{renderRich(t('err.body'))}</p>
         </div>
       </div>
     )
@@ -294,78 +530,146 @@ export default function App() {
   if (!config) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-slate-400 animate-pulse">Loading deploy state…</div>
+        <div className="flex items-center gap-3 text-slate-400">
+          <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 pulse-dot" />
+          <span className="animate-pulse">{t('app.loading')}</span>
+        </div>
       </div>
     )
   }
 
-  const network = config.network === 'Mainnet' ? 'mainnet' : 'preprod'
+  const estValue =
+    vault && vault.totalShares > 0n
+      ? fmtMicro((userShares * vault.totalDeposited) / vault.totalShares)
+      : t('vault.na')
 
+  // ── Render ──
   return (
     <div className="min-h-screen p-4 sm:p-6 md:p-8">
-      <div className="max-w-3xl mx-auto space-y-6">
+      <div className="max-w-3xl mx-auto space-y-5 sm:space-y-6">
 
-        {/* Header */}
-        <header>
-          <h1 className="text-3xl sm:text-4xl font-bold">
-            🛟 <span className="gradient-text">OptiVaults V1</span> Emergency Withdraw
-          </h1>
-          <p className="text-slate-400 text-sm sm:text-base mt-2">
-            Self-serve withdrawal + Layer 3 dead-man-switch trigger.
-            Runs entirely in your browser — no backend dependency.
-          </p>
-          <div className="text-xs text-slate-500 mt-3 font-mono break-all">
-            Network: <span className="text-cyan-400">{config.network}</span> ·
-            Release: <span className="text-cyan-400">{config.releaseTag}</span> ·
-            Vault: <span className="text-cyan-400">{config.proxyAddr.slice(0, 16)}…{config.proxyAddr.slice(-8)}</span>
+        {/* ── Header ── */}
+        <header className="space-y-4 sm:space-y-5">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <span className="text-2xl sm:text-3xl shrink-0">🛟</span>
+              <div className="leading-tight min-w-0">
+                <div className="text-sm font-bold gradient-text">{t('app.brand')}</div>
+                <div className="text-[11px] text-slate-500 truncate">{t('app.brandSub')}</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <LangToggle />
+              <span
+                className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium ${
+                  lucid
+                    ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400'
+                    : 'border-slate-700 bg-slate-800/50 text-slate-400'
+                }`}
+              >
+                <span className={`w-2 h-2 rounded-full ${lucid ? 'bg-emerald-400 pulse-dot' : 'bg-slate-500'}`} />
+                <span className="hidden sm:inline">
+                  {lucid ? t('app.connected') : t('app.disconnected')}
+                </span>
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <h1 className="text-3xl sm:text-4xl font-bold gradient-text">{t('app.title')}</h1>
+            <p className="text-slate-400 text-sm sm:text-base mt-2 max-w-2xl leading-relaxed">
+              {renderRich(t('app.subtitle'))}
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <Pill
+              label={t('app.network')}
+              value={config.network}
+              tone={config.network === 'Mainnet' ? 'good' : 'accent'}
+            />
+            <Pill label={t('app.release')} value={config.releaseTag} />
+            <Pill label={t('app.vault')} value={short(config.proxyAddr)} />
+          </div>
+
+          <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-slate-500">
+            {(['keys', 'browser', 'blockfrost', 'nft'] as const).map((k) => (
+              <span key={k} className="flex items-center gap-1.5">
+                <span className="w-1 h-1 rounded-full bg-emerald-400/70" />
+                {t(`trust.${k}`)}
+              </span>
+            ))}
           </div>
         </header>
 
-        {/* Pre-flight warning */}
-        <div className="glass-card rounded-xl p-4 sm:p-5 text-xs sm:text-sm text-slate-300 border-l-4 border-l-amber-500">
-          <strong className="text-amber-400">Before you use this tool:</strong>
-          <ul className="mt-2 ml-4 list-disc space-y-1 text-slate-400">
-            <li>Your wallet seed/key <strong className="text-slate-200">never leaves your wallet extension</strong>.</li>
-            <li>You supply your own Blockfrost API key (free tier works).</li>
-            <li>Only <strong className="text-slate-200">partial Withdraw</strong> is supported (full-drain needs admin tools).</li>
-            <li>Early-withdraw fee applies unless the keeper has been inactive 7+ days.</li>
-            <li>The CommunitySunset Layer 3 trigger is <strong className="text-slate-200">irreversible</strong> and
-                only available after ≥90 days of operational inactivity.</li>
-          </ul>
-        </div>
-
-        {/* 1. Connect */}
+        {/* ── Before you start (until connected) ── */}
         {!lucid && (
-          <section className="glass-card glow-border rounded-2xl p-5 sm:p-6 space-y-4">
-            <h2 className="text-lg sm:text-xl font-bold text-emerald-400">1. Connect</h2>
+          <div className="glass-card rounded-2xl p-5 sm:p-6 border-l-4 border-l-amber-500 space-y-3">
+            <div className="flex items-center gap-2.5">
+              <span className="text-amber-400">
+                <Svg d={ICON.alert} className="w-4 h-4" />
+              </span>
+              <strong className="text-amber-400 text-sm">{t('safety.title')}</strong>
+            </div>
+            <ul className="space-y-1.5 text-xs sm:text-sm text-slate-400">
+              {(['b1', 'b2', 'b3', 'b4', 'b5'] as const).map((k) => (
+                <li key={k} className="flex gap-2">
+                  <span className="text-amber-500/70 shrink-0">•</span>
+                  <span>{renderRich(t(`safety.${k}`))}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
-            <div>
-              <label className="block text-xs uppercase tracking-wide text-slate-400 mb-1.5">
-                Blockfrost API key (preprod… or mainnet…)
+        {/* ── Connect ── */}
+        {!lucid && (
+          <SectionCard
+            title={t('connect.title')}
+            eyebrow={t('connect.step')}
+            iconPath={ICON.link}
+            accent="emerald"
+          >
+            <div className="space-y-2">
+              <label className="block text-xs uppercase tracking-wide text-slate-400">
+                {t('connect.keyLabel')}
               </label>
               <input
                 type="password"
                 value={bfKey}
                 onChange={(e) => setBfKey(e.target.value)}
-                placeholder="preprod..."
+                placeholder={t('connect.keyPlaceholder')}
                 autoComplete="off"
               />
-              <p className="text-xs text-slate-500 mt-1">
-                Get a free key at <a href="https://blockfrost.io" target="_blank" rel="noopener noreferrer" className="text-cyan-400 underline">blockfrost.io</a>
+              <p className="text-xs text-slate-500">
+                {t('connect.keyHelp1')}{' '}
+                <a
+                  href="https://blockfrost.io"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-cyan-400 hover:text-cyan-300 underline"
+                >
+                  blockfrost.io
+                </a>{' '}
+                {t('connect.keyHelp2')}
               </p>
             </div>
 
-            <div>
-              <label className="block text-xs uppercase tracking-wide text-slate-400 mb-1.5">
-                CIP-30 Wallet
+            <div className="space-y-2">
+              <label className="block text-xs uppercase tracking-wide text-slate-400">
+                {t('connect.walletLabel')}
               </label>
               <select value={walletName} onChange={(e) => setWalletName(e.target.value)}>
-                <option value="">— select wallet —</option>
+                <option value="">{t('connect.walletSelect')}</option>
                 {walletList.map((w) => (
-                  <option key={w} value={w}>{w}</option>
+                  <option key={w} value={w}>
+                    {w}
+                  </option>
                 ))}
                 {walletList.length === 0 && (
-                  <option value="" disabled>(No wallet detected — install Eternl/Nami/Lace)</option>
+                  <option value="" disabled>
+                    {t('connect.walletNone')}
+                  </option>
                 )}
               </select>
             </div>
@@ -373,230 +677,296 @@ export default function App() {
             <button
               onClick={handleConnect}
               disabled={busy || !bfKey || !walletName}
-              className="w-full bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 disabled:from-slate-600 disabled:to-slate-600 disabled:cursor-not-allowed text-slate-950 font-bold py-3 rounded-xl transition-all"
+              className="btn-shine w-full bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 active:scale-[0.99] disabled:from-slate-600 disabled:to-slate-600 disabled:cursor-not-allowed text-slate-950 font-bold py-3 rounded-xl transition-all shadow-lg shadow-emerald-500/20 disabled:shadow-none"
             >
-              {busy ? 'Connecting…' : 'Connect'}
+              {busy ? t('connect.btnBusy') : t('connect.btn')}
             </button>
-          </section>
+          </SectionCard>
         )}
 
-        {/* 2. Vault state + Withdraw */}
+        {/* ── Connected summary ── */}
+        {lucid && (
+          <div className="glass-card rounded-2xl px-5 py-3.5 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 pulse-dot shrink-0" />
+              <span className="text-sm text-slate-300 shrink-0">{t('conn.wallet')}</span>
+              <span className="font-mono text-xs text-slate-500 truncate">{short(walletAddr)}</span>
+            </div>
+            <span className="text-xs font-mono text-slate-400 shrink-0">{networkResolved}</span>
+          </div>
+        )}
+
+        {/* ── Vault State ── */}
         {lucid && vault && (
-          <section className="glass-card glow-border rounded-2xl p-5 sm:p-6 space-y-5">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg sm:text-xl font-bold text-emerald-400">2. Vault State</h2>
-              <button onClick={handleRefresh} disabled={busy} className="text-xs text-cyan-400 hover:text-cyan-300 disabled:text-slate-600">
-                ↻ Refresh
+          <SectionCard
+            title={t('vault.title')}
+            eyebrow={t('vault.eyebrow')}
+            iconPath={ICON.vault}
+            accent="cyan"
+            action={
+              <button
+                onClick={handleRefresh}
+                disabled={busy}
+                className="inline-flex items-center gap-1.5 text-xs text-cyan-400 hover:text-cyan-300 disabled:text-slate-600 transition-colors"
+              >
+                <Svg d={ICON.refresh} className="w-3.5 h-3.5" />
+                {t('vault.refresh')}
               </button>
-            </div>
-
-            <div className="bg-slate-900/70 rounded-lg p-4 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-              <div className="text-slate-400">Vault version</div>
-              <div className="text-right font-mono">V{vault.vaultVersion.toString()}</div>
-
-              <div className="text-slate-400">Total deposited</div>
-              <div className="text-right font-mono">{fmtMicro(vault.totalDeposited)}</div>
-
-              <div className="text-slate-400">Total shares</div>
-              <div className="text-right font-mono">{vault.totalShares.toString()}</div>
-
-              <div className="text-slate-400">Idle buffer</div>
-              <div className="text-right font-mono">{fmtMicro(vault.idleBuffer)}</div>
-
-              <div className="text-slate-400">Non-deposit value</div>
-              <div className="text-right font-mono">{fmtMicro(vault.nonDepositValue)}</div>
-
-              <div className="text-slate-400">Early-withdraw fee</div>
-              <div className="text-right font-mono">{(Number(vault.earlyWithdrawFeeBps) / 100).toFixed(2)}%</div>
-
-              <div className="text-slate-400">Frozen</div>
-              <div className={`text-right font-mono ${vault.frozen === 1n ? 'text-amber-400' : 'text-emerald-400'}`}>
-                {vault.frozen === 1n ? 'YES' : 'no'}
+            }
+          >
+            {/* Your position — headline */}
+            <DataPanel className="border border-emerald-500/20">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <div className="text-xs uppercase tracking-wide text-slate-500">
+                    {t('vault.yourShares')}
+                  </div>
+                  <div className="font-mono text-lg sm:text-xl mt-0.5">{userShares.toString()}</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-xs uppercase tracking-wide text-slate-500">
+                    {t('vault.estValue')}
+                  </div>
+                  <div className="font-mono text-lg sm:text-xl mt-0.5 text-emerald-400">{estValue}</div>
+                </div>
               </div>
+            </DataPanel>
 
-              <div className="text-slate-400">Sunset triggered</div>
-              <div className={`text-right font-mono ${vault.communitySunsetTriggered === 1n ? 'text-amber-400' : 'text-emerald-400'}`}>
-                {vault.communitySunsetTriggered === 1n ? 'YES (Layer 3 active)' : 'no'}
-              </div>
-
-              <div className="text-slate-400">Last compound</div>
-              <div className="text-right font-mono text-xs">{fmtTime(vault.lastCompoundTime)}</div>
-
-              <div className="text-slate-400">Last realloc</div>
-              <div className="text-right font-mono text-xs">{fmtTime(vault.lastReallocTime)}</div>
-            </div>
+            {/* Vault datum */}
+            <DataPanel className="space-y-2.5">
+              <InfoRow label={t('vault.version')} value={`V${vault.vaultVersion.toString()}`} />
+              <InfoRow label={t('vault.totalDeposited')} value={fmtMicro(vault.totalDeposited)} />
+              <InfoRow label={t('vault.totalShares')} value={vault.totalShares.toString()} />
+              <InfoRow label={t('vault.idleBuffer')} value={fmtMicro(vault.idleBuffer)} />
+              <InfoRow label={t('vault.nonDeposit')} value={fmtMicro(vault.nonDepositValue)} />
+              <InfoRow
+                label={t('vault.earlyFee')}
+                value={`${(Number(vault.earlyWithdrawFeeBps) / 100).toFixed(2)}%`}
+              />
+              <InfoRow
+                label={t('vault.frozen')}
+                value={vault.frozen === 1n ? t('vault.yes') : t('vault.no')}
+                tone={vault.frozen === 1n ? 'warn' : 'good'}
+              />
+              <InfoRow
+                label={t('vault.sunsetFlag')}
+                value={vault.communitySunsetTriggered === 1n ? t('vault.sunsetActive') : t('vault.no')}
+                tone={vault.communitySunsetTriggered === 1n ? 'warn' : 'good'}
+              />
+              <InfoRow
+                label={t('vault.lastCompound')}
+                value={fmtTime(vault.lastCompoundTime, t('vault.never'))}
+              />
+              <InfoRow
+                label={t('vault.lastRealloc')}
+                value={fmtTime(vault.lastReallocTime, t('vault.never'))}
+              />
+            </DataPanel>
 
             {vault.liqwidPositions.length > 0 && (
-              <div className="bg-slate-900/70 rounded-lg p-4 text-xs space-y-1">
-                <div className="text-slate-400 mb-1.5">Liqwid positions:</div>
+              <DataPanel className="space-y-1.5">
+                <div className="text-xs uppercase tracking-wide text-slate-500 mb-1">
+                  {t('vault.liqwid')}
+                </div>
                 {vault.liqwidPositions.map((p) => (
-                  <div key={p.marketId.toString()} className="font-mono text-slate-300">
-                    market_id={p.marketId.toString()} qtokens={p.qtokensHeld.toString()} supplied={fmtMicro(p.suppliedValue)}
+                  <div key={p.marketId.toString()} className="font-mono text-xs text-slate-300 break-all">
+                    market_id={p.marketId.toString()} · qtokens={p.qtokensHeld.toString()} · supplied=
+                    {fmtMicro(p.suppliedValue)}
                   </div>
                 ))}
-              </div>
+              </DataPanel>
             )}
+          </SectionCard>
+        )}
 
-            <div className="bg-slate-900/70 rounded-lg p-4 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-              <div className="text-slate-400">Wallet</div>
-              <div className="text-right font-mono text-xs">{walletAddr.slice(0, 16)}…{walletAddr.slice(-8)}</div>
+        {/* ── Withdraw ── */}
+        {lucid && vault && (
+          <SectionCard
+            title={t('wd.title')}
+            eyebrow={t('wd.step')}
+            iconPath={ICON.download}
+            accent="emerald"
+          >
+            <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">{renderRich(t('wd.desc'))}</p>
 
-              <div className="text-slate-400">Your vUSDCx</div>
-              <div className="text-right font-mono">{userShares.toString()}</div>
-
-              <div className="text-slate-400">Estimated value</div>
-              <div className="text-right font-mono text-emerald-400">
-                {vault.totalShares > 0n
-                  ? fmtMicro((userShares * vault.totalDeposited) / vault.totalShares)
-                  : 'n/a'}
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs uppercase tracking-wide text-slate-400 mb-1.5">
-                Shares to burn (raw vUSDCx)
+            <div className="space-y-2">
+              <label className="block text-xs uppercase tracking-wide text-slate-400">
+                {t('wd.sharesLabel')}
               </label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  value={sharesInput}
-                  onChange={(e) => setSharesInput(e.target.value)}
-                  placeholder="0"
-                />
-                <button
-                  onClick={setMaxShares}
-                  className="px-4 py-2 text-xs uppercase tracking-wide rounded-lg border border-slate-600 hover:border-cyan-500/50 text-slate-300"
-                >
-                  Max
-                </button>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={sharesInput}
+                onChange={(e) => setSharesInput(e.target.value)}
+                placeholder="0"
+              />
+              <div className="grid grid-cols-4 gap-1.5">
+                {[25, 50, 75, 100].map((pct) => (
+                  <button
+                    key={pct}
+                    onClick={() => setSharesPct(pct)}
+                    className="py-2 text-xs font-bold uppercase tracking-wide rounded-lg border border-slate-700 bg-slate-800/50 text-cyan-400 hover:border-cyan-500/50 hover:bg-slate-800 transition-colors"
+                  >
+                    {pct === 100 ? t('wd.max') : `${pct}%`}
+                  </button>
+                ))}
               </div>
-              {sharesParsed === -1n && (
-                <p className="text-xs text-red-400 mt-1">Invalid integer</p>
-              )}
+              {sharesParsed === -1n && <p className="text-xs text-red-400">{t('wd.invalid')}</p>}
               {sharesParsed > userShares && (
-                <p className="text-xs text-red-400 mt-1">Exceeds your balance ({userShares.toString()})</p>
+                <p className="text-xs text-red-400">
+                  {t('wd.exceeds', { bal: userShares.toString() })}
+                </p>
               )}
             </div>
 
             {quote && (
-              <div className="bg-cyan-500/5 border border-cyan-500/30 rounded-lg p-4 space-y-1.5 text-sm">
-                <div className="flex justify-between"><span className="text-slate-400">Gross withdraw</span><span className="font-mono">{fmtMicro(quote.baseWithdraw)}</span></div>
-                <div className="flex justify-between"><span className="text-slate-400">Early fee</span><span className="font-mono">{fmtMicro(quote.earlyFee)} {quote.keeperInactive && <span className="text-xs text-emerald-400 ml-1">(WAIVED)</span>}</span></div>
-                <div className="flex justify-between font-bold"><span>You receive</span><span className="font-mono text-emerald-400">{fmtMicro(quote.netWithdraw)}</span></div>
+              <div className="rounded-xl border border-cyan-500/30 bg-cyan-500/5 p-4 space-y-2.5">
+                <InfoRow label={t('wd.gross')} value={fmtMicro(quote.baseWithdraw)} />
+                <InfoRow
+                  label={t('wd.fee')}
+                  value={
+                    <>
+                      {fmtMicro(quote.earlyFee)}
+                      {quote.keeperInactive && (
+                        <span className="ml-1.5 text-[10px] font-bold uppercase tracking-wide text-emerald-400">
+                          {t('wd.waived')}
+                        </span>
+                      )}
+                    </>
+                  }
+                  tone={quote.keeperInactive ? 'good' : 'warn'}
+                />
+                <div className="h-px bg-slate-700/60" />
+                <div className="flex items-baseline justify-between gap-4">
+                  <span className="text-sm font-semibold text-slate-200">{t('wd.receive')}</span>
+                  <span className="font-mono text-lg sm:text-xl font-bold text-emerald-400">
+                    {fmtMicro(quote.netWithdraw)}
+                  </span>
+                </div>
               </div>
             )}
 
             <button
               onClick={handleWithdraw}
               disabled={busy || !sharesValid}
-              className="w-full bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 disabled:from-slate-600 disabled:to-slate-600 disabled:cursor-not-allowed text-slate-950 font-bold py-3 rounded-xl transition-all"
+              className="btn-shine w-full bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 active:scale-[0.99] disabled:from-slate-600 disabled:to-slate-600 disabled:cursor-not-allowed text-slate-950 font-bold py-3 rounded-xl transition-all shadow-lg shadow-emerald-500/20 disabled:shadow-none"
             >
-              {busy ? 'Working…' : 'Sign & Submit Withdraw'}
+              {busy ? t('wd.btnBusy') : !sharesValid ? t('wd.btnEnter') : t('wd.btn')}
             </button>
-          </section>
+          </SectionCard>
         )}
 
-        {/* 3. CommunitySunset (Layer 3) — always render once connected so users see countdown */}
+        {/* ── Layer 3 CommunitySunset ── */}
         {lucid && vault && sunset && (
-          <section
-            className={`glass-card glow-border rounded-2xl p-5 sm:p-6 space-y-4 ${
-              sunset.available || sunset.alreadyTriggered ? 'danger' : ''
-            }`}
+          <SectionCard
+            title={t('sunset.title')}
+            eyebrow={
+              sunset.alreadyTriggered
+                ? t('sunset.eyeActive')
+                : sunset.available
+                ? t('sunset.eyeAvail')
+                : t('sunset.eyeCountdown')
+            }
+            iconPath={ICON.alert}
+            accent={sunset.available || sunset.alreadyTriggered ? 'amber' : 'slate'}
+            danger={sunset.available || sunset.alreadyTriggered}
           >
-            <h2 className={`text-lg sm:text-xl font-bold ${sunset.available || sunset.alreadyTriggered ? 'text-amber-400' : 'text-slate-300'}`}>
-              3. Layer 3 CommunitySunset {sunset.alreadyTriggered ? '— ACTIVE' : sunset.available ? '— AVAILABLE NOW' : '— countdown'}
-            </h2>
-
-            <p className="text-sm text-slate-400">
-              The 90-day dead-man-switch. After ≥90 days of operational inactivity (no Compound, no realloc),
-              ANY vUSDCx holder can flip <code className="text-amber-400">frozen=1 + community_sunset_triggered=1</code>,
-              opening permissionless paths in <code className="text-amber-400">vault_recall.RecallFromLiqwid</code> +
-              <code className="text-amber-400"> vault_protocol.DeployToProtocol</code> Layer 2 so depositors can
-              recover their full proportional USDCx share without keeper or governance intervention.
-              <strong className="text-slate-200"> The flag is one-way — irreversible.</strong>
+            <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
+              {renderRich(t('sunset.desc'), 'text-amber-400')}
             </p>
 
-            <div className="bg-slate-900/70 rounded-lg p-4 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-              <div className="text-slate-400">Last activity</div>
-              <div className="text-right font-mono text-xs">{fmtTime(sunset.lastActivityMs)}</div>
+            {/* Countdown headline */}
+            {!sunset.alreadyTriggered && (
+              <DataPanel className="text-center">
+                <div className="text-xs uppercase tracking-wide text-slate-500">
+                  {sunset.available ? t('sunset.cdReached') : t('sunset.cdLabel')}
+                </div>
+                <div
+                  className={`font-mono font-bold mt-1 ${
+                    sunset.available ? 'text-2xl text-amber-400' : 'text-4xl text-slate-200'
+                  }`}
+                >
+                  {sunset.available ? t('sunset.availNow') : sunset.daysUntilSunset}
+                </div>
+              </DataPanel>
+            )}
 
-              <div className="text-slate-400">Days since activity</div>
-              <div className="text-right font-mono">{sunset.daysSinceActivity >= 0 ? sunset.daysSinceActivity : 'n/a'}</div>
-
-              <div className="text-slate-400">Threshold</div>
-              <div className="text-right font-mono">90 days</div>
-
-              <div className="text-slate-400">Days remaining</div>
-              <div className={`text-right font-mono ${sunset.daysUntilSunset === 0 ? 'text-amber-400' : ''}`}>
-                {sunset.daysUntilSunset}
-              </div>
-
-              <div className="text-slate-400">Already triggered</div>
-              <div className={`text-right font-mono ${sunset.alreadyTriggered ? 'text-amber-400' : 'text-emerald-400'}`}>
-                {sunset.alreadyTriggered ? 'YES' : 'no'}
-              </div>
-
-              <div className="text-slate-400">Caller vUSDCx (≥1 required)</div>
-              <div className={`text-right font-mono ${userShares > 0n ? 'text-emerald-400' : 'text-red-400'}`}>
-                {userShares.toString()}
-              </div>
-            </div>
+            <DataPanel className="space-y-2.5">
+              <InfoRow
+                label={t('sunset.lastActivity')}
+                value={fmtTime(sunset.lastActivityMs, t('vault.never'))}
+              />
+              <InfoRow
+                label={t('sunset.daysSince')}
+                value={sunset.daysSinceActivity >= 0 ? sunset.daysSinceActivity : t('vault.na')}
+              />
+              <InfoRow label={t('sunset.threshold')} value={t('sunset.thresholdVal')} />
+              <InfoRow
+                label={t('sunset.daysLeft')}
+                value={sunset.daysUntilSunset}
+                tone={sunset.daysUntilSunset === 0 ? 'warn' : 'default'}
+              />
+              <InfoRow
+                label={t('sunset.triggered')}
+                value={sunset.alreadyTriggered ? t('vault.yes') : t('vault.no')}
+                tone={sunset.alreadyTriggered ? 'warn' : 'good'}
+              />
+              <InfoRow
+                label={t('sunset.callerShares')}
+                value={userShares.toString()}
+                tone={userShares > 0n ? 'good' : 'bad'}
+              />
+            </DataPanel>
 
             {sunset.alreadyTriggered ? (
-              <div className="text-sm text-amber-400 bg-amber-500/10 border border-amber-500/30 p-3 rounded-lg">
-                Sunset is already active. Permissionless RecallFromLiqwid + DeployToProtocol Layer 2 paths are open.
-                Use <code>opti-gov</code> CLI or follow the operator runbook to exercise them.
+              <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-400 leading-relaxed">
+                {renderRich(t('sunset.activeMsg'), 'text-amber-300')}
               </div>
             ) : sunset.available ? (
-              <>
-                {!sunsetConfirmOpen ? (
-                  <button
-                    onClick={() => setSunsetConfirmOpen(true)}
-                    disabled={busy || userShares <= 0n}
-                    className="w-full bg-gradient-to-r from-amber-500 to-red-600 hover:from-amber-400 hover:to-red-500 disabled:from-slate-600 disabled:to-slate-600 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl transition-all"
-                  >
-                    {userShares <= 0n ? 'Need ≥1 vUSDCx to trigger' : 'Trigger Layer 3 Sunset (irreversible)'}
-                  </button>
-                ) : (
-                  <div className="space-y-3 bg-amber-500/10 border-2 border-amber-500/40 rounded-lg p-4">
-                    <div className="text-sm text-amber-300">
-                      <strong>This is irreversible.</strong> After confirming, the vault will be permanently
-                      frozen for normal Deposit/Compound, and any vUSDCx holder will be able to push the
-                      permissionless recovery path. You should only do this if the founder + keeper +
-                      governance have all genuinely failed.
-                    </div>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={handleSunsetTrigger}
-                        disabled={busy}
-                        className="flex-1 bg-gradient-to-r from-amber-500 to-red-600 hover:from-amber-400 hover:to-red-500 disabled:from-slate-600 disabled:to-slate-600 text-white font-bold py-3 rounded-lg transition-all"
-                      >
-                        {busy ? 'Working…' : 'Yes, trigger sunset'}
-                      </button>
-                      <button
-                        onClick={() => setSunsetConfirmOpen(false)}
-                        disabled={busy}
-                        className="px-6 py-3 border border-slate-600 hover:border-slate-400 text-slate-300 rounded-lg"
-                      >
-                        Cancel
-                      </button>
-                    </div>
+              !sunsetConfirmOpen ? (
+                <button
+                  onClick={() => setSunsetConfirmOpen(true)}
+                  disabled={busy || userShares <= 0n}
+                  className="btn-shine w-full bg-gradient-to-r from-amber-500 to-red-600 hover:from-amber-400 hover:to-red-500 active:scale-[0.99] disabled:from-slate-600 disabled:to-slate-600 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-amber-500/20 disabled:shadow-none"
+                >
+                  {userShares <= 0n ? t('sunset.btnNeed') : t('sunset.btnTrigger')}
+                </button>
+              ) : (
+                <div className="space-y-3 rounded-xl border-2 border-amber-500/40 bg-amber-500/10 p-4 animate-fadeIn">
+                  <div className="text-sm text-amber-300 leading-relaxed">
+                    {renderRich(t('sunset.confirm'), 'text-amber-200')}
                   </div>
-                )}
-              </>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleSunsetTrigger}
+                      disabled={busy}
+                      className="flex-1 bg-gradient-to-r from-amber-500 to-red-600 hover:from-amber-400 hover:to-red-500 disabled:from-slate-600 disabled:to-slate-600 text-white font-bold py-3 rounded-lg transition-all"
+                    >
+                      {busy ? t('wd.btnBusy') : t('sunset.confirmYes')}
+                    </button>
+                    <button
+                      onClick={() => setSunsetConfirmOpen(false)}
+                      disabled={busy}
+                      className="px-6 py-3 border border-slate-600 hover:border-slate-400 text-slate-300 rounded-lg transition-colors"
+                    >
+                      {t('sunset.confirmCancel')}
+                    </button>
+                  </div>
+                </div>
+              )
             ) : (
-              <div className="text-sm text-slate-400 bg-slate-900/50 border border-slate-700 p-3 rounded-lg">
-                Not available yet — vault is still operational. {sunset.daysUntilSunset > 0 && `${sunset.daysUntilSunset} days remaining.`}
+              <div className="rounded-xl border border-slate-700 bg-slate-900/50 p-4 text-sm text-slate-400">
+                {t('sunset.notYet')}
+                {sunset.daysUntilSunset > 0 && ` ${t('sunset.daysRemain', { n: sunset.daysUntilSunset })}`}
               </div>
             )}
-          </section>
+          </SectionCard>
         )}
 
-        {/* Status banner */}
+        {/* ── Status + tx ── */}
         {status && (
           <div
-            className={`rounded-xl p-3 text-sm break-all ${
+            className={`rounded-xl p-3.5 text-sm break-all flex items-start gap-2.5 ${
               status.kind === 'error'
                 ? 'bg-red-500/10 border border-red-500/30 text-red-400'
                 : status.kind === 'ok'
@@ -604,31 +974,140 @@ export default function App() {
                 : 'bg-cyan-500/10 border border-cyan-500/30 text-cyan-400'
             }`}
           >
-            {status.text}
+            <span className="shrink-0 mt-0.5">
+              {status.kind === 'ok' ? (
+                <Svg d={ICON.check} className="w-4 h-4" />
+              ) : status.kind === 'error' ? (
+                <Svg d={ICON.alert} className="w-4 h-4" />
+              ) : (
+                <span className="block w-3 h-3 rounded-full bg-cyan-400 pulse-dot mt-0.5" />
+              )}
+            </span>
+            <span>{status.text}</span>
           </div>
         )}
 
         {txHash && networkResolved && (
-          <div className="text-sm">
-            <a
-              href={explorerUrl(networkResolved, txHash)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-cyan-400 underline"
-            >
-              View on Cardanoscan ↗
-            </a>
-            <span className="text-slate-500 ml-2 font-mono text-xs">{txHash}</span>
-          </div>
+          <a
+            href={explorerUrl(networkResolved, txHash)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="glass-card rounded-xl p-3.5 flex items-center justify-between gap-3 hover:border-cyan-500/30 transition-colors"
+          >
+            <span className="flex items-center gap-2 text-sm text-cyan-400">
+              <Svg d={ICON.external} className="w-4 h-4" />
+              {t('tx.view')}
+            </span>
+            <span className="font-mono text-xs text-slate-500 truncate">{short(txHash)}</span>
+          </a>
         )}
 
-        {/* Footer */}
-        <footer className="text-xs text-slate-500 pt-6 border-t border-slate-800 space-y-1.5">
-          <div>OptiVaults V1 Emergency Withdraw v0.1.0 · Apache 2.0</div>
-          <div>
-            <strong className="text-slate-400">Offline use:</strong> Save this page (Ctrl+S / ⌘+S, "Webpage HTML Only").
-            The saved file is fully self-contained and works any time, even if optivaults.app and the GitHub
-            repo go offline.
+        {/* ── Reference: how it works ── */}
+        <SectionCard
+          title={t('how.title')}
+          eyebrow={t('how.eyebrow')}
+          iconPath={ICON.book}
+          accent="slate"
+        >
+          <ol className="space-y-2.5">
+            {(['s1', 's2', 's3', 's4', 's5', 's6'] as const).map((k, i) => (
+              <li key={k} className="flex gap-3 text-xs sm:text-sm text-slate-400">
+                <span className="shrink-0 flex items-center justify-center w-5 h-5 rounded-md bg-slate-700/60 text-slate-300 text-[11px] font-bold">
+                  {i + 1}
+                </span>
+                <span className="leading-relaxed">{t(`how.${k}`)}</span>
+              </li>
+            ))}
+          </ol>
+        </SectionCard>
+
+        {/* ── Reference: scope & limits ── */}
+        <SectionCard
+          title={t('scope.title')}
+          eyebrow={t('scope.eyebrow')}
+          iconPath={ICON.shield}
+          accent="slate"
+        >
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <div className="text-xs font-bold uppercase tracking-wide text-emerald-400">
+                {t('scope.doesTitle')}
+              </div>
+              <ul className="space-y-1.5 text-xs sm:text-sm text-slate-400">
+                {(['d1', 'd2', 'd3'] as const).map((k) => (
+                  <li key={k} className="flex gap-2">
+                    <span className="text-emerald-400 shrink-0">✓</span>
+                    <span>{t(`scope.${k}`)}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="space-y-2">
+              <div className="text-xs font-bold uppercase tracking-wide text-slate-500">
+                {t('scope.notTitle')}
+              </div>
+              <ul className="space-y-1.5 text-xs sm:text-sm text-slate-400">
+                {(['n1', 'n2', 'n3', 'n4'] as const).map((k) => (
+                  <li key={k} className="flex gap-2">
+                    <span className="text-slate-600 shrink-0">✗</span>
+                    <span>{t(`scope.${k}`)}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </SectionCard>
+
+        {/* ── Footer ── */}
+        <footer className="pt-2 space-y-5">
+          <div className="glass-card rounded-2xl p-5 sm:p-6 space-y-2.5 border-l-4 border-l-cyan-500/40">
+            <div className="flex items-center gap-2 text-sm font-bold text-cyan-400">
+              <Svg d={ICON.shield} className="w-4 h-4" />
+              {t('footer.backupTitle')}
+            </div>
+            <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
+              {renderRich(t('footer.backup'))}
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs">
+            <a
+              href="https://github.com/OptiVaults/optivaults-reference"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 text-slate-400 hover:text-white transition-colors"
+            >
+              <GitHubMark />
+              {t('footer.source')}
+            </a>
+            <a
+              href="https://github.com/OptiVaults/optivaults-protocol/blob/v1/whitepaper/whitepaper.md"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-slate-400 hover:text-cyan-400 transition-colors"
+            >
+              {t('footer.whitepaper')}
+            </a>
+            <a
+              href="https://github.com/OptiVaults/optivaults-reference/blob/v1/SECURITY.md"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-slate-400 hover:text-cyan-400 transition-colors"
+            >
+              {t('footer.security')}
+            </a>
+            <a
+              href="https://optivaults.app"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-slate-400 hover:text-cyan-400 transition-colors"
+            >
+              optivaults.app
+            </a>
+          </div>
+
+          <div className="text-center text-[11px] text-slate-600">
+            {t('footer.meta', { net: config.network, rel: config.releaseTag })}
           </div>
         </footer>
       </div>
