@@ -11,16 +11,19 @@
   },
   "dependencies": {
     "@lucid-evolution/lucid": "^0.4.29",
-    "@lucid-evolution/utils": "^0.1.78",
+    "@lucid-evolution/utils": "^0.1.66",
     "buffer": "^6.0.3",
     "react": "^19.2.4",
     "react-dom": "^19.2.4"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.2.2",
+    "@types/node": "^24.12.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
+    "esbuild": "^0.27.7",
+    "rollup": "^4.60.2",
     "tailwindcss": "^4.2.2",
     "typescript": "~5.9.3",
     "vite": "^8.0.1",

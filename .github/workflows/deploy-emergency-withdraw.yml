@@ -1,0 +1,83 @@
+# Deploy the V1 emergency-withdraw SPA to GitHub Pages.
+#
+# Why GitHub Actions and not "Deploy from a branch":
+#   emergency-withdraw is a monorepo subdirectory. GitHub Pages' branch
+#   mode can only publish the repo root or /docs — it cannot point at
+#   emergency-withdraw/dist. So the build runs in CI and the dist/ output
+#   is uploaded as a Pages artifact.
+#
+# Custom domain (emergency.optivaults.app):
+#   The site is served from the domain root, so Vite's default base ('/')
+#   is correct — vite.config.ts needs no `base` change. The custom domain
+#   is carried by emergency-withdraw/public/CNAME, which Vite copies into
+#   dist/ during the build.
+#
+# One-time setup in the repo:
+#   Settings → Pages → Build and deployment → Source = "GitHub Actions".
+name: Deploy emergency-withdraw
+
+on:
+  push:
+    branches: [v1]
+    # Only rebuild when the SPA or this workflow changes.
+    paths:
+      - 'emergency-withdraw/**'
+      - '.github/workflows/deploy-emergency-withdraw.yml'
+  workflow_dispatch:
+
+# Least-privilege token: read the repo, write a Pages deployment.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Serialize Pages deployments; let an in-flight deploy finish.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: emergency-withdraw
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          # Vite 8 requires Node 20.19+ / 22.12+; 22 is the current LTS.
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: emergency-withdraw/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Runs `tsc -b && vite build && node scripts/inject-buffer-polyfill.mjs`.
+      - name: Build
+        run: npm run build
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # working-directory does not apply to `uses` steps — path is
+          # resolved from the repo root.
+          path: emergency-withdraw/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
