@@ -55,6 +55,40 @@ function fmtMicro(n: bigint, dec: bigint = DECIMALS): string {
   return (neg ? '-' : '') + Number(head).toLocaleString() + '.' + tail
 }
 
+/** vUSDCx is stored at 1e12 raw per display unit (≈ 1 USDCx of value). */
+const SHARE_SCALE = 1_000_000_000_000n
+
+/** Format a raw vUSDCx amount as a human-readable string (up to 6 dp). */
+function fmtShares(n: bigint): string {
+  const neg = n < 0n
+  const abs = neg ? -n : n
+  const whole = abs / SHARE_SCALE
+  const frac = ((abs % SHARE_SCALE) / 1_000_000n).toString().padStart(6, '0').replace(/0+$/, '')
+  return (neg ? '-' : '') + Number(whole).toLocaleString() + (frac ? '.' + frac : '')
+}
+
+/** Raw vUSDCx → plain comma-free decimal string, for the input field. */
+function rawSharesToInput(n: bigint): string {
+  if (n <= 0n) return ''
+  const whole = n / SHARE_SCALE
+  const frac = (n % SHARE_SCALE).toString().padStart(12, '0').replace(/0+$/, '')
+  return whole.toString() + (frac ? '.' + frac : '')
+}
+
+/** Parse a human vUSDCx input string → raw bigint. Returns -1n on invalid. */
+function parseShares(input: string): bigint {
+  const s = input.trim()
+  if (!s) return 0n
+  if (!/^\d*\.?\d*$/.test(s) || s === '.') return -1n
+  const [whole, frac = ''] = s.split('.')
+  if (frac.length > 12) return -1n
+  try {
+    return BigInt(whole || '0') * SHARE_SCALE + BigInt((frac + '000000000000').slice(0, 12))
+  } catch {
+    return -1n
+  }
+}
+
 function fmtTime(ms: bigint, never: string): string {
   if (ms <= 0n) return never
   return new Date(Number(ms)).toISOString().replace('T', ' ').slice(0, 19) + ' UTC'
@@ -433,14 +467,7 @@ export default function App() {
   }
 
   // ── Withdraw ──
-  const sharesParsed = (() => {
-    if (!sharesInput.trim()) return 0n
-    try {
-      return BigInt(sharesInput.trim())
-    } catch {
-      return -1n
-    }
-  })()
+  const sharesParsed = parseShares(sharesInput)
   const sharesValid = sharesParsed > 0n && sharesParsed <= userShares
   const quote = (() => {
     if (!vault || !sharesValid) return null
@@ -456,12 +483,12 @@ export default function App() {
     const cap = vault.totalShares - 1n
     const base = userShares > cap ? cap : userShares
     const v = pct >= 100 ? base : (base * BigInt(pct)) / 100n
-    setSharesInput(v.toString())
+    setSharesInput(rawSharesToInput(v))
   }
 
   async function handleWithdraw() {
     if (!lucid || !config || !vault || !networkResolved || !sharesValid) return
-    if (!confirm(t('wd.confirmNative', { n: sharesParsed.toString() }))) return
+    if (!confirm(t('wd.confirmNative', { n: fmtShares(sharesParsed) }))) return
     setBusy(true)
     setTxHash('')
     setStatus({ kind: 'info', text: t('st.buildingWd') })
@@ -721,7 +748,7 @@ export default function App() {
                   <div className="text-xs uppercase tracking-wide text-slate-500">
                     {t('vault.yourShares')}
                   </div>
-                  <div className="font-mono text-lg sm:text-xl mt-0.5">{userShares.toString()}</div>
+                  <div className="font-mono text-lg sm:text-xl mt-0.5">{fmtShares(userShares)}</div>
                 </div>
                 <div className="text-right">
                   <div className="text-xs uppercase tracking-wide text-slate-500">
@@ -736,7 +763,7 @@ export default function App() {
             <DataPanel className="space-y-2.5">
               <InfoRow label={t('vault.version')} value={`V${vault.vaultVersion.toString()}`} />
               <InfoRow label={t('vault.totalDeposited')} value={fmtMicro(vault.totalDeposited)} />
-              <InfoRow label={t('vault.totalShares')} value={vault.totalShares.toString()} />
+              <InfoRow label={t('vault.totalShares')} value={fmtShares(vault.totalShares)} />
               <InfoRow label={t('vault.idleBuffer')} value={fmtMicro(vault.idleBuffer)} />
               <InfoRow label={t('vault.nonDeposit')} value={fmtMicro(vault.nonDepositValue)} />
               <InfoRow
@@ -787,18 +814,31 @@ export default function App() {
             iconPath={ICON.download}
             accent="emerald"
           >
-            <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">{renderRich(t('wd.desc'))}</p>
+            <div className="space-y-2">
+              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">{t('wd.desc')}</p>
+              <details className="group">
+                <summary className="text-xs text-slate-500 cursor-pointer hover:text-slate-300 select-none">
+                  {t('wd.techToggle')}
+                </summary>
+                <p className="mt-2 text-xs text-slate-400 leading-relaxed">{renderRich(t('wd.techDetail'))}</p>
+              </details>
+            </div>
 
             <div className="space-y-2">
-              <label className="block text-xs uppercase tracking-wide text-slate-400">
-                {t('wd.sharesLabel')}
-              </label>
+              <div className="flex items-baseline justify-between gap-3">
+                <label className="text-xs uppercase tracking-wide text-slate-400">
+                  {t('wd.sharesLabel')}
+                </label>
+                <span className="text-xs text-slate-500">
+                  {t('wd.balanceHint', { bal: fmtShares(userShares) })}
+                </span>
+              </div>
               <input
                 type="text"
-                inputMode="numeric"
+                inputMode="decimal"
                 value={sharesInput}
                 onChange={(e) => setSharesInput(e.target.value)}
-                placeholder="0"
+                placeholder="0.0"
               />
               <div className="grid grid-cols-4 gap-1.5">
                 {[25, 50, 75, 100].map((pct) => (
@@ -814,7 +854,7 @@ export default function App() {
               {sharesParsed === -1n && <p className="text-xs text-red-400">{t('wd.invalid')}</p>}
               {sharesParsed > userShares && (
                 <p className="text-xs text-red-400">
-                  {t('wd.exceeds', { bal: userShares.toString() })}
+                  {t('wd.exceeds', { bal: fmtShares(userShares) })}
                 </p>
               )}
             </div>
@@ -871,9 +911,19 @@ export default function App() {
             accent={sunset.available || sunset.alreadyTriggered ? 'amber' : 'slate'}
             danger={sunset.available || sunset.alreadyTriggered}
           >
-            <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-              {renderRich(t('sunset.desc'), 'text-amber-400')}
-            </p>
+            <div className="space-y-2">
+              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
+                {renderRich(t('sunset.desc'), 'text-amber-400')}
+              </p>
+              <details className="group">
+                <summary className="text-xs text-slate-500 cursor-pointer hover:text-slate-300 select-none">
+                  {t('sunset.techToggle')}
+                </summary>
+                <p className="mt-2 text-xs text-slate-400 leading-relaxed">
+                  {renderRich(t('sunset.techDetail'), 'text-amber-400')}
+                </p>
+              </details>
+            </div>
 
             {/* Countdown headline */}
             {!sunset.alreadyTriggered && (
@@ -913,7 +963,7 @@ export default function App() {
               />
               <InfoRow
                 label={t('sunset.callerShares')}
-                value={userShares.toString()}
+                value={fmtShares(userShares)}
                 tone={userShares > 0n ? 'good' : 'bad'}
               />
             </DataPanel>
