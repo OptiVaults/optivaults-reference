@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# Local environment / credentials — never source-control
+.env
+.wrangler
+
 # Operator-specific deployment script (kept locally; not for public repo)
 deploy.sh
 
