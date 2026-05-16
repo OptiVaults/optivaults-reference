@@ -19,7 +19,7 @@ V1 ships a different on-chain contract surface from V9.x / V10:
 ### Option A — from source
 
 ```bash
-cd v1/reference/withdraw-cli
+cd withdraw-cli
 npm install
 npm run build
 node dist/cli.js --help
@@ -117,7 +117,7 @@ Override the bundled config in any of three ways:
 2. `OPTIVAULTS_V1_CONFIG=<path>` env var
 3. Edit `config/<network>.json` in the package directly
 
-The JSON shape mirrors `keeper/data/preprod-<release>.json` (the same file the keeper, API, and frontend all read). After a fresh ceremony the operator simply replaces it.
+The JSON shape mirrors `keeper/data/preprod-<release>.json` (the same file the keeper and frontend read). After a fresh ceremony the operator simply replaces it.
 
 ## V1 Withdraw-Zero pattern
 

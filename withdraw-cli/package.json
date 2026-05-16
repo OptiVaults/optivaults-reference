@@ -9,11 +9,13 @@
   "files": [
     "dist",
     "config",
+    "scripts",
     "README.md"
   ],
   "scripts": {
     "build": "tsup src/cli.ts --format esm --target node20 --out-dir dist && chmod +x dist/cli.js",
     "dev": "tsx src/cli.ts",
+    "postinstall": "node scripts/fix-libsodium.mjs",
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
