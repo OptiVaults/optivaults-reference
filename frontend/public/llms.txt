@@ -1,6 +1,6 @@
 # OptiVaults Vault App
 
-> Non-custodial auto-yield stablecoin vault on Cardano. **V1 pre-launch.** Design + Aiken implementation complete (17 logic validators + 4 NFT mint policies + 1 DEX adapter = 22 compiled artefacts). The OptiVaults team currently operates a Preprod testnet instance at v1-preprod.pages.dev for behavioural verification. V1 mainnet launch happens at the pre-audit 100K USDCx cap once §1.5 launch gates clear; external audit (target Q2-Q3 2027 if §8.1 funding stack delivers) lifts the cap toward Stage 3 — audit is a cap-lift gate, not a launch gate (see whitepaper §0.2).
+> Non-custodial auto-yield stablecoin vault on Cardano. **V1 pre-launch.** Design + Aiken implementation complete (17 logic validators + 4 NFT mint policies + 1 DEX adapter + 2 SundaeSwap artefacts = 24 compiled artefacts). The OptiVaults team currently operates a Preprod testnet instance at v1-preprod.pages.dev for behavioural verification. V1 mainnet launch happens at the pre-audit 100K USDCx cap once §1.5 launch gates clear; external audit (target Q2-Q3 2027 if §8.1 funding stack delivers) lifts the cap toward Stage 3 — audit is a cap-lift gate, not a launch gate (see whitepaper §0.2).
 
 This is the OptiVaults V1 web application — the React/Vite frontend that talks to the OptiVaults V1 smart contracts on Cardano. Users deposit USDCx stablecoins (issued by Circle via xReserve) and receive vUSDCx share tokens whose value accrues via auto-compounding. An automated keeper deploys capital to Liqwid Finance stablecoin markets (DJED, USDM) and Minswap V2 swap routes. All accounting, fee enforcement, and security invariants are enforced entirely on-chain.
 
@@ -9,7 +9,7 @@ This is the OptiVaults V1 web application — the React/Vite frontend that talks
 - Blockchain: Cardano (eUTXO model)
 - Smart Contracts: Aiken PlutusV3
 - Current Version: **V1 pre-launch** (design + Aiken implementation complete; external audit target Q2-Q3 2027)
-- Architecture: Withdraw-Zero Forwarding Pattern. `vault_proxy` dispatches to 10 staking validators (`vault_user`, `vault_keeper_hot`, `vault_batcher`, `vault_swap_ada`, `vault_protocol`, `vault_recall`, `vault_liqwid`, `vault_gov_policy`, `vault_gov_emergency`, `vault_admin_deploy`). Plus `keeper_stake_script` (weekly rotation), on-chain `treasury` (4-category budget), `multisig_gov`, `registry` (9 fields), `order`, `vusdcx`, 4 NFT mint policies, and 1 DEX adapter (`minswap_v2_adapter`).
+- Architecture: Withdraw-Zero Forwarding Pattern. `vault_proxy` dispatches to 10 staking validators (`vault_user`, `vault_keeper_hot`, `vault_batcher`, `vault_swap_ada`, `vault_protocol`, `vault_recall`, `vault_liqwid`, `vault_gov_policy`, `vault_gov_emergency`, `vault_admin_deploy`). Plus `keeper_stake_script` (weekly rotation), on-chain `treasury` (4-category budget), `multisig_gov`, `registry` (9 fields), `order`, `vusdcx`, 4 NFT mint policies, 1 DEX adapter (`minswap_v2_adapter`), and the 2-artefact SundaeSwap adapter pair (`sundaeswap_adapter` + `sundaeswap_cancel_guard`).
 - VaultDatum: 29 fields, 15 immutable
 - Share Token: vUSDCx (Cardano native asset)
 - Deposit Asset: USDCx — Cardano-native stablecoin issued by Circle via xReserve (launched on Cardano February 2026), 1:1 USDC-backed, monthly Deloitte attestations. 6 decimals. Minimum 10 USDCx.

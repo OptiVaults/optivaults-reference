@@ -70,7 +70,7 @@
   <meta name="DC.title" content="OptiVaults — Auto-Yield Stablecoin Vault on Cardano (V1 pre-launch)" />
   <meta name="DC.creator" content="OptiVaults" />
   <meta name="DC.description"
-    content="Non-custodial auto-yield stablecoin vault on Cardano. V1 pre-launch — design + Aiken implementation complete (17 logic validators + 4 NFT mint policies + 1 DEX adapter = 22 compiled artefacts, 194 unit + property tests / 689 randomized checks pass), external audit target Q2-Q3 2027." />
+    content="Non-custodial auto-yield stablecoin vault on Cardano. V1 pre-launch — design + Aiken implementation complete (17 logic validators + 4 NFT mint policies + 1 DEX adapter + 2 SundaeSwap artefacts = 24 compiled artefacts, 194 unit + property tests / 689 randomized checks pass), external audit target Q2-Q3 2027." />
   <meta name="DC.publisher" content="OptiVaults" />
   <meta name="DC.language" content="en, zh-TW, ja" />
   <meta name="DC.format" content="text/html" />
@@ -110,7 +110,7 @@
     "operatingSystem": "Web",
     "browserRequirements": "Requires a CIP-30 Cardano wallet (Eternl, Nami, Lace, Vespr, Typhon, Yoroi)",
     "softwareVersion": "V1.0-pre-launch",
-    "releaseNotes": "V1 (public launch candidate, design + Aiken implementation complete): 17 logic validators + 4 NFT mint policies + 1 DEX adapter = 22 compiled artefacts, all under 16 KB PlutusV3 reference-script ceiling. 194 unit + property tests / 689 randomized checks pass. 3-way Compound fee split (launch 40% keeper / 0% gov / 60% treasury; hard caps keeper ≤ 40%, gov ≤ 10%, combined ≤ 50%, treasury floor ≥ 50%). UpdateFeeSplit 21-day timelock. UpdateSlippagePolicy 48-hour timelock. Phase 1 three-layer governance safety. 29-field VaultDatum with 15 immutable fields. License: Apache 2.0. External audit target Q2-Q3 2027.",
+    "releaseNotes": "V1 (public launch candidate, design + Aiken implementation complete): 17 logic validators + 4 NFT mint policies + 1 DEX adapter + 2 SundaeSwap artefacts = 24 compiled artefacts, all under 16 KB PlutusV3 reference-script ceiling. 194 unit + property tests / 689 randomized checks pass. 3-way Compound fee split (launch 40% keeper / 0% gov / 60% treasury; hard caps keeper ≤ 40%, gov ≤ 10%, combined ≤ 50%, treasury floor ≥ 50%). UpdateFeeSplit 21-day timelock. UpdateSlippagePolicy 48-hour timelock. Phase 1 three-layer governance safety. 29-field VaultDatum with 15 immutable fields. License: Apache 2.0. External audit target Q2-Q3 2027.",
     "offers": {
       "@type": "Offer",
       "price": "0",
@@ -231,7 +231,7 @@
     "softwareVersion": "V1.0-pre-launch",
     "codeRepository": "https://github.com/OptiVaults/optivaults-protocol",
     "license": "https://www.apache.org/licenses/LICENSE-2.0",
-    "description": "Aiken PlutusV3 smart contracts for OptiVaults V1. 17 logic validators (vault_proxy + vault_user + vault_keeper_hot + vault_batcher + vault_swap_ada + vault_protocol + vault_recall + vault_liqwid + vault_gov_policy + vault_gov_emergency + vault_admin_deploy + keeper_stake_script + treasury + multisig_gov + registry + order + vusdcx) + 4 NFT mint policies (vault_nft + governance_nft + registry_auth_nft + gov_signer_nft) + 1 DEX adapter (minswap_v2_adapter) = 22 compiled artefacts. 29-field VaultDatum with 15 immutable fields. Withdraw-Zero Forwarding Pattern with 10 staking validators dispatched via vault_proxy. m-of-n MultisigGov with 7-21 day timelocks + 1-of-n cancel veto. Performance fee hard-capped at 4.5%. 3-way Compound fee split at launch (40% keeper / 0% gov / 60% treasury). 0.1% early withdraw fee deferred to remaining holders via share-price accrual. 7-day keeper-inactivity emergency escape. Layer 3 CommunitySunset 90-day permissionless dead-man-switch. External audit target Q2-Q3 2027. Apache 2.0 license."
+    "description": "Aiken PlutusV3 smart contracts for OptiVaults V1. 17 logic validators (vault_proxy + vault_user + vault_keeper_hot + vault_batcher + vault_swap_ada + vault_protocol + vault_recall + vault_liqwid + vault_gov_policy + vault_gov_emergency + vault_admin_deploy + keeper_stake_script + treasury + multisig_gov + registry + order + vusdcx) + 4 NFT mint policies (vault_nft + governance_nft + registry_auth_nft + gov_signer_nft) + 1 DEX adapter (minswap_v2_adapter) + 2 SundaeSwap artefacts (sundaeswap_adapter + sundaeswap_cancel_guard) = 24 compiled artefacts. 29-field VaultDatum with 15 immutable fields. Withdraw-Zero Forwarding Pattern with 10 staking validators dispatched via vault_proxy. m-of-n MultisigGov with 7-21 day timelocks + 1-of-n cancel veto. Performance fee hard-capped at 4.5%. 3-way Compound fee split at launch (40% keeper / 0% gov / 60% treasury). 0.1% early withdraw fee deferred to remaining holders via share-price accrual. 7-day keeper-inactivity emergency escape. Layer 3 CommunitySunset 90-day permissionless dead-man-switch. External audit target Q2-Q3 2027. Apache 2.0 license."
   }
   </script>
 </head>
