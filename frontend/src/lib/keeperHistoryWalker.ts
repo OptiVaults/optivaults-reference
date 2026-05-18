@@ -34,7 +34,7 @@ import { getCachedMany, setCachedMany, clearCacheForDomain, type CachedTxClassif
 //
 // IMPORTANT: walker awaits purge BEFORE getCachedMany() to close the
 // race where stale entries get served while clearCache is in flight.
-const KEEPER_CLASSIFIER_VERSION = '2026-05-12-r13-ada-topup-donation'
+const KEEPER_CLASSIFIER_VERSION = '2026-05-18-r14-liqwid-amounts'
 let _keeperPurgePromise: Promise<void> | null = null
 
 function purgeKeeperCacheIfClassifierChanged(): Promise<void> {
@@ -165,6 +165,13 @@ interface VaultDelta {
   liqwidPositionsCountDelta: number
   frozenChanged: boolean
   sunsetChanged: boolean
+  /** Supply: `supplied_value` of the LiqwidPosition added this TX (resolved
+   *  by market_id diff). Lets the Supply row surface the principal amount
+   *  instead of a bare "SupplyToLiqwid". */
+  liqwidSupplied?: bigint
+  /** Recall: `supplied_value` (principal) of the LiqwidPosition removed
+   *  this TX. Paired with `idleBufferDelta` to derive realized yield/loss. */
+  liqwidRecalled?: bigint
 }
 
 async function computeVaultDelta(
@@ -194,12 +201,20 @@ async function computeVaultDelta(
   }
   const after = await parseVaultDatum(outVault.inline_datum)
   if (!after) return null
+  // Diff liqwid_positions by market_id — the count alone can't tell a
+  // Supply/Recall row how much was supplied/recalled.
+  const beforeIds = new Set(before.liqwid_positions.map((p) => p.market_id))
+  const afterIds = new Set(after.liqwid_positions.map((p) => p.market_id))
+  const added = after.liqwid_positions.find((p) => !beforeIds.has(p.market_id))
+  const removed = before.liqwid_positions.find((p) => !afterIds.has(p.market_id))
   return {
     tdDelta: after.total_deposited - before.total_deposited,
     idleBufferDelta: after.idle_buffer - before.idle_buffer,
     liqwidPositionsCountDelta: after.liqwid_positions.length - before.liqwid_positions.length,
     frozenChanged: after.frozen !== before.frozen,
     sunsetChanged: after.community_sunset_triggered !== before.community_sunset_triggered,
+    liqwidSupplied: added?.supplied_value,
+    liqwidRecalled: removed?.supplied_value,
   }
 }
 
@@ -213,7 +228,7 @@ function classifyByValidatorAndDelta(
     if (!delta) return { type: 'vault_tx', detail: 'vault_user (unparsed datum)' }
     if (delta.sunsetChanged) return { type: 'vault_tx', detail: 'CommunitySunset triggered' }
     if (delta.tdDelta > 0n) return { type: 'batch_deposit', detail: `Direct Deposit +${formatU(delta.tdDelta)}` }
-    if (delta.tdDelta < 0n) return { type: 'batch_withdraw', detail: `Direct Withdraw ${formatU(delta.tdDelta)}` }
+    if (delta.tdDelta < 0n) return { type: 'batch_withdraw', detail: `Direct Withdraw -${formatU(delta.tdDelta)}` }
     return { type: 'vault_tx', detail: 'vault_user (no td delta)' }
   }
   if (validatorName === 'vault_keeper_hot') {
@@ -250,8 +265,25 @@ function classifyByValidatorAndDelta(
   }
   if (validatorName === 'vault_liqwid') {
     if (!delta) return { type: 'supply', detail: 'SupplyToLiqwid / RecallFromLiqwid' }
-    if (delta.liqwidPositionsCountDelta > 0) return { type: 'supply', detail: 'SupplyToLiqwid' }
-    if (delta.liqwidPositionsCountDelta < 0) return { type: 'recall', detail: 'RecallFromLiqwid' }
+    if (delta.liqwidPositionsCountDelta > 0) {
+      const amt = delta.liqwidSupplied !== undefined ? ` ${formatU(delta.liqwidSupplied)}` : ''
+      return { type: 'supply', detail: `SupplyToLiqwid${amt}` }
+    }
+    if (delta.liqwidPositionsCountDelta < 0) {
+      let detail = 'RecallFromLiqwid'
+      if (delta.liqwidRecalled !== undefined) {
+        detail += ` ${formatU(delta.liqwidRecalled)}`
+        // A deposit-token Liqwid market returns the underlying to
+        // idle_buffer, so idleBufferDelta is the amount actually
+        // recovered — the gap vs the principal is realized yield/loss.
+        if (delta.idleBufferDelta > 0n) {
+          const pnl = delta.idleBufferDelta - delta.liqwidRecalled
+          if (pnl > 0n) detail += ` | +${formatU(pnl)} yield`
+          else if (pnl < 0n) detail += ` | -${formatU(pnl)} loss`
+        }
+      }
+      return { type: 'recall', detail }
+    }
     return { type: 'supply', detail: 'Liqwid (rebalance)' }
   }
   if (validatorName === 'vault_admin_deploy') return { type: 'deploy', detail: 'AdminDeployNonDeposit (gov)' }
@@ -371,10 +403,19 @@ export async function walkVaultKeeperHistory(
           return u.amount.every((a) => a.unit === 'lovelace')
         })
       : undefined
+    // r14 (2026-05-18): the ceremony vault-creation TX has no input at
+    // the proxy address but mints + outputs the vault UTXO. Pre-r14 it
+    // fell through to the catch-all `unknown` bucket and rendered as
+    // "TX / unknown" — looks like a bug. Detect it explicitly.
+    const genesisVault = !inboundAdaTopUp && inputsAtVault === 0
+      && f.utxos.outputs.some((u) => u.address === state.proxyAddr
+        && u.amount.some((a) => a.unit.toLowerCase() === state.vaultNftUnit.toLowerCase()))
     if (inboundAdaTopUp) {
       const lovelace = inboundAdaTopUp.amount.find((a) => a.unit === 'lovelace')
       const ada = lovelace ? (Number(lovelace.quantity) / 1e6).toFixed(2) : '?'
       cls = { type: 'donation', detail: `ADA top-up (+${ada} ADA NoDatum)` }
+    } else if (genesisVault) {
+      cls = { type: 'vault_tx', detail: 'Vault deployed (ceremony genesis)' }
     } else {
       cls = classifyByValidatorAndDelta(validatorName, delta, inputsAtVault)
     }

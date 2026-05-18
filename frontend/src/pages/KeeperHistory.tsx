@@ -159,6 +159,12 @@ export default function KeeperHistory() {
                     {action.type === 'batch_withdraw' && (
                       <p className="text-red-400 text-sm sm:text-base font-semibold">{action.detail.match(/[+-]?\d+\.\d+/)?.[0] || ''}</p>
                     )}
+                    {action.type === 'supply' && (
+                      <p className="text-teal-400 text-sm sm:text-base font-semibold">{action.detail.match(/\d+\.\d+/)?.[0] || ''}</p>
+                    )}
+                    {action.type === 'recall' && (
+                      <p className="text-purple-400 text-sm sm:text-base font-semibold">{action.detail.match(/\d+\.\d+/)?.[0] || ''}</p>
+                    )}
                     <p className="text-slate-500 text-[10px] whitespace-nowrap">
                       {parseFloat(action.estTxFeeAda) > 0 ? `Fee: ${parseFloat(action.estTxFeeAda).toFixed(4)} ADA` : ''}
                     </p>
