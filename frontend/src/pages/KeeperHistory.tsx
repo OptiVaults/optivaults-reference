@@ -18,6 +18,7 @@ const TYPE_STYLE: Record<string, { bg: string; text: string; label: string }> = 
   supply:         { bg: 'bg-teal-500/10',    text: 'text-teal-400',    label: 'Supply' },
   merge:          { bg: 'bg-sky-500/10',     text: 'text-sky-400',     label: 'Merge' },
   swap:           { bg: 'bg-indigo-500/10',  text: 'text-indigo-400',  label: 'Swap' },
+  donation:       { bg: 'bg-lime-500/10',    text: 'text-lime-400',    label: 'Donation' },
   vault_tx:       { bg: 'bg-slate-500/10',   text: 'text-slate-400',   label: 'TX' },
 }
 

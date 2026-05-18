@@ -34,7 +34,7 @@ import { getCachedMany, setCachedMany, clearCacheForDomain, type CachedTxClassif
 //
 // IMPORTANT: walker awaits purge BEFORE getCachedMany() to close the
 // race where stale entries get served while clearCache is in flight.
-const KEEPER_CLASSIFIER_VERSION = '2026-05-18-r14-liqwid-amounts'
+const KEEPER_CLASSIFIER_VERSION = '2026-05-18-r15-adapter-donation'
 let _keeperPurgePromise: Promise<void> | null = null
 
 function purgeKeeperCacheIfClassifierChanged(): Promise<void> {
@@ -144,6 +144,13 @@ function buildValidatorMap(state: V1DeployState): ValidatorMap {
   add('govEmergencyStakeHash', 'vault_gov_emergency')
   add('adminDeployStakeHash', 'vault_admin_deploy')
   add('keeperStakeHash', 'keeper_stake_script')
+  // DEX swap-adapter / cancel-guard withdraw-0 validators. These ride
+  // along on a Deploy/swap TX as an auxiliary reward redeemer next to
+  // the real operation validator (vault_protocol etc.) — mapped here so
+  // the redeemer picker can recognise + skip them (see AUXILIARY_STAKE).
+  add('minswapV2AdapterHash', 'minswap_v2_adapter')
+  add('sundaeswapAdapterHash', 'sundaeswap_adapter')
+  add('sundaeswapCancelGuardHash', 'sundaeswap_cancel_guard')
 
   const bySpendHash = new Map<string, string>()
   const addS = (k: string, name: string) => { if (h[k]) bySpendHash.set(h[k].toLowerCase(), name) }
@@ -154,6 +161,19 @@ function buildValidatorMap(state: V1DeployState): ValidatorMap {
   addS('multisigGovHash', 'multisig_gov')
   return { byStakeHash, bySpendHash }
 }
+
+/**
+ * Validator names that ride along on a TX as auxiliary Withdraw-Zero
+ * reward redeemers and are NOT the operation being performed. The
+ * redeemer picker skips these so the real operation validator (e.g.
+ * `vault_protocol` on a Deploy that swaps via an adapter) is selected.
+ */
+const AUXILIARY_STAKE = new Set([
+  'keeper_stake_script',
+  'minswap_v2_adapter',
+  'sundaeswap_adapter',
+  'sundaeswap_cancel_guard',
+])
 
 // ─────────────────────────────────────────────────────────────
 // Action classification
@@ -234,11 +254,15 @@ function classifyByValidatorAndDelta(
   if (validatorName === 'vault_keeper_hot') {
     if (!delta) return { type: 'compound', detail: 'Compound (no delta)' }
     if (delta.tdDelta > 0n) return { type: 'compound', detail: `Compound +${formatU(delta.tdDelta)} yield` }
+    // A zero-yield Compound and a RebalanceBuffer are indistinguishable
+    // from the vault datum delta alone (both leave total_deposited
+    // unchanged and only move idle_buffer). The walker classifies the
+    // whole `vault_keeper_hot` family as `compound`; the redeemer
+    // constructor — the only thing that could split them — is not
+    // fetched. (An earlier `rebalance` branch here was dead code: its
+    // guard was identical to the line above, so it never executed.)
     if (delta.tdDelta === 0n && delta.idleBufferDelta < 0n) {
-      return { type: 'compound', detail: 'Reconciliation (zero-yield)' }
-    }
-    if (delta.idleBufferDelta < 0n && delta.tdDelta === 0n) {
-      return { type: 'rebalance', detail: 'RebalanceBuffer' }
+      return { type: 'compound', detail: 'Reconciliation / RebalanceBuffer (zero-yield)' }
     }
     return { type: 'compound', detail: 'Compound / RebalanceBuffer / SwapAda' }
   }
@@ -290,6 +314,11 @@ function classifyByValidatorAndDelta(
   if (validatorName === 'vault_gov_policy') return { type: 'vault_tx', detail: 'Gov policy update' }
   if (validatorName === 'vault_gov_emergency') return { type: 'vault_tx', detail: 'EmergencyWithdraw (gov)' }
   if (validatorName === 'vault_swap_ada') return { type: 'swap', detail: 'SwapAda' }
+  // DEX adapter / cancel-guard appearing as the sole validator (no vault
+  // operation rode with it) — a standalone swap or order cancel.
+  if (validatorName === 'minswap_v2_adapter') return { type: 'swap', detail: 'Minswap V2 swap' }
+  if (validatorName === 'sundaeswap_adapter') return { type: 'swap', detail: 'SundaeSwap swap' }
+  if (validatorName === 'sundaeswap_cancel_guard') return { type: 'vault_tx', detail: 'DEX order cancel' }
   return { type: 'vault_tx', detail: validatorName }
 }
 
@@ -366,19 +395,23 @@ export async function walkVaultKeeperHistory(
     const f = fetched.get(tx.tx_hash)
     if (!f) continue
 
-    // Pick the operation-specific reward redeemer — for keeper-auth TXs
-    // there are TWO Withdraw-Zero redeemers in canonical hash order:
-    //   - keeper_stake_script (auxiliary A-Plain auth — NOT the operation)
+    // Pick the operation-specific reward redeemer — a keeper TX carries
+    // several Withdraw-Zero redeemers in canonical hash order:
+    //   - auxiliary (keeper_stake_script auth, DEX swap-adapter, cancel
+    //     guard) — NOT the operation
     //   - vault_batcher / vault_keeper_hot / vault_protocol / vault_recall /
     //     vault_liqwid / vault_swap_ada / vault_admin_deploy / etc. (the
     //     actual operation being authorized)
-    // Skip keeper_stake_script and take the first operation validator.
-    // Fallback to first spend redeemer if neither is present.
+    // Skip the auxiliary set and take the first operation validator;
+    // fall back to the first auxiliary redeemer (so a standalone swap /
+    // order-cancel still resolves to a name), then to the first spend
+    // redeemer if no reward redeemer is present at all.
     const rewardRdmrs = f.redeemers.filter((r) => r.purpose === 'reward')
     const opRdmr = rewardRdmrs.find((r) => {
       const name = map.byStakeHash.get(r.script_hash.toLowerCase())
-      return name && name !== 'keeper_stake_script'
-    }) || rewardRdmrs[0]
+      return !!name && !AUXILIARY_STAKE.has(name)
+    }) || rewardRdmrs.find((r) => map.byStakeHash.has(r.script_hash.toLowerCase()))
+      || rewardRdmrs[0]
     const validatorName = opRdmr
       ? map.byStakeHash.get(opRdmr.script_hash.toLowerCase()) || 'unknown_stake'
       : map.bySpendHash.get(f.redeemers[0]?.script_hash?.toLowerCase() || '') || 'unknown'
@@ -386,34 +419,40 @@ export async function walkVaultKeeperHistory(
     const inputsAtVault = f.utxos.inputs.filter((u) => u.address === state.proxyAddr).length
     const delta = await computeVaultDelta(f.utxos.inputs, f.utxos.outputs, state.proxyAddr, state.vaultNftUnit)
 
-    // r13 (2026-05-12): keeper ADA-top-up donation pattern. A TX with NO
-    // redeemers (no Plutus eval) that creates an output at the vault
-    // proxy address with NoDatum + lovelace-only is the documented
-    // keeper-side ADA top-up sent before a subsequent MergeUtxo absorbs
-    // stable tokens (raises vault min-ADA headroom). Pre-r13 these
-    // landed in the catch-all "unknown" bucket and made the keeper
-    // history page look like there were unattributed vault touches.
+    // r13 (2026-05-12) / r15 (2026-05-18): keeper-side donation pattern.
+    // A TX with NO redeemers (no Plutus eval) that creates a NoDatum
+    // output at the vault proxy address — sent before a subsequent
+    // MergeUtxo folds it in (raises min-ADA headroom for an ADA top-up,
+    // or seeds non-deposit value for a stable-token donation). The
+    // output must NOT carry the vault NFT (that is the vault UTXO /
+    // ceremony genesis, handled below). r13 detected ADA-only top-ups;
+    // r15 widens it to token donations, which previously fell through
+    // to the catch-all "unknown" bucket.
+    const nftUnitLc = state.vaultNftUnit.toLowerCase()
     let cls: { type: string; detail: string }
     const noRedeemers = f.redeemers.length === 0
-    const inboundAdaTopUp = noRedeemers && inputsAtVault === 0
+    const inboundDonation = noRedeemers && inputsAtVault === 0
       ? f.utxos.outputs.find((u) => {
           if (u.address !== state.proxyAddr) return false
           if (u.inline_datum) return false
           if (u.data_hash) return false
-          return u.amount.every((a) => a.unit === 'lovelace')
+          return !u.amount.some((a) => a.unit.toLowerCase() === nftUnitLc)
         })
       : undefined
     // r14 (2026-05-18): the ceremony vault-creation TX has no input at
     // the proxy address but mints + outputs the vault UTXO. Pre-r14 it
     // fell through to the catch-all `unknown` bucket and rendered as
     // "TX / unknown" — looks like a bug. Detect it explicitly.
-    const genesisVault = !inboundAdaTopUp && inputsAtVault === 0
+    const genesisVault = !inboundDonation && inputsAtVault === 0
       && f.utxos.outputs.some((u) => u.address === state.proxyAddr
-        && u.amount.some((a) => a.unit.toLowerCase() === state.vaultNftUnit.toLowerCase()))
-    if (inboundAdaTopUp) {
-      const lovelace = inboundAdaTopUp.amount.find((a) => a.unit === 'lovelace')
+        && u.amount.some((a) => a.unit.toLowerCase() === nftUnitLc))
+    if (inboundDonation) {
+      const lovelace = inboundDonation.amount.find((a) => a.unit === 'lovelace')
       const ada = lovelace ? (Number(lovelace.quantity) / 1e6).toFixed(2) : '?'
-      cls = { type: 'donation', detail: `ADA top-up (+${ada} ADA NoDatum)` }
+      const tokenCount = inboundDonation.amount.filter((a) => a.unit !== 'lovelace').length
+      cls = tokenCount > 0
+        ? { type: 'donation', detail: `Token top-up (+${ada} ADA + ${tokenCount} asset${tokenCount > 1 ? 's' : ''} NoDatum)` }
+        : { type: 'donation', detail: `ADA top-up (+${ada} ADA NoDatum)` }
     } else if (genesisVault) {
       cls = { type: 'vault_tx', detail: 'Vault deployed (ceremony genesis)' }
     } else {
