@@ -1,0 +1,326 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`keeperHistoryWalker — action-type classification > compound-cycle fixture classifies to a stable snapshot 1`] = `
+[
+  {
+    "detail": "RecallFromLiqwid 2.00 USDCx | +31.00 USDCx yield",
+    "txHash": "565772c5fc7cf5437d6b81c784a5614fb6055575a7b8962d9df1f776ecf4d6ef",
+    "type": "recall",
+  },
+  {
+    "detail": "SupplyToLiqwid 2.00 USDCx",
+    "txHash": "63d5f3b850329e14026a94b2af5b6eb1a808cd9f8f531b6412846a4bfae693c9",
+    "type": "supply",
+  },
+  {
+    "detail": "Compound +6.64 USDCx yield",
+    "txHash": "81f244e3582fdb395a6db0c7d09c4cb4b5474cf6c92652a940f8544744c0587a",
+    "type": "compound",
+  },
+  {
+    "detail": "RecallFromLiqwid 1.11 USDCx | +6.96 USDCx yield",
+    "txHash": "501aa2b149d3b7217e1cc098b383c337a9e511e6628a4e04bf7213d7e6b843bf",
+    "type": "recall",
+  },
+  {
+    "detail": "SupplyToLiqwid 1.11 USDCx",
+    "txHash": "d1193b43bdeb05927e5ff2f1a7d4142c6b91c29a878d0ffef3f84ea508a1c66c",
+    "type": "supply",
+  },
+  {
+    "detail": "Compound +7.26 USDCx yield",
+    "txHash": "16b50b1fb65e5d87a5e91aa93cbe6fd30f8f33b7bd1ef44535537c45f2983351",
+    "type": "compound",
+  },
+  {
+    "detail": "RecallFromLiqwid 5.00 USDCx | +7.10 USDCx yield",
+    "txHash": "ac60be82a758711573a521525d2ead05da98163902b84e04d55fd2de286e379b",
+    "type": "recall",
+  },
+  {
+    "detail": "SupplyToLiqwid 5.00 USDCx",
+    "txHash": "11e3c15d9816f1b10a0fd7ca6beb767cd58e7d51fe3c0e317d1bc66151e2fc98",
+    "type": "supply",
+  },
+  {
+    "detail": "RecallFromLiqwid 5.00 USDCx | +0.50 USDCx yield",
+    "txHash": "9ae5aa6ef4ec975d3e4df207329b8ce462a22cc0fca5bfcbb5349b402567c5bb",
+    "type": "recall",
+  },
+  {
+    "detail": "SupplyToLiqwid 5.00 USDCx",
+    "txHash": "d2fa4f85d3b7e417209b6d6192ff652ccb87a8d9f9ede418c90d1b72811956a6",
+    "type": "supply",
+  },
+  {
+    "detail": "DeployToProtocol",
+    "txHash": "6421eca4ac6b1adfb48523438551ace3f80215eb1ca16409de29c8f8f4e682d9",
+    "type": "deploy",
+  },
+  {
+    "detail": "Gov policy update",
+    "txHash": "a938c975aa575fb42c300cb37814269bdcefd1c814c5be52359227b00c323866",
+    "type": "vault_tx",
+  },
+  {
+    "detail": "MergeUtxo",
+    "txHash": "e05d1d89d990d92d63f7cabeae325e12e889c61bfd64b22ab0336ceea91d9a55",
+    "type": "merge",
+  },
+  {
+    "detail": "Token top-up (+2.00 ADA + 1 asset NoDatum)",
+    "txHash": "4b017e349a5d00627dbb3d1fabe86158c86f4d1f886feaf3c88d0d63c040d128",
+    "type": "donation",
+  },
+  {
+    "detail": "Direct Deposit +10.00 USDCx",
+    "txHash": "f4a52aa523a1f5cd450ee4768d720e37d26382bb13864b6e13df95af6793d78a",
+    "type": "batch_deposit",
+  },
+  {
+    "detail": "Vault deployed (ceremony genesis)",
+    "txHash": "c56a983cb3ed3b2f7ef4db43493e43c98e75c84f2052b3289d441cf2a30d673f",
+    "type": "vault_tx",
+  },
+]
+`;
+
+exports[`keeperHistoryWalker — action-type classification > keeper-daemon fixture classifies to a stable snapshot 1`] = `
+[
+  {
+    "detail": "SupplyToLiqwid 23.41 USDCx",
+    "txHash": "7a5a2160b04ab186b99ceb8de8f41f71716b4588e5d071a648caf005c950e4c0",
+    "type": "supply",
+  },
+  {
+    "detail": "RecallFromLiqwid 32.50 USDCx",
+    "txHash": "37073d54552f5bacacea25f37f6bb42461b567748d92193693f7c0a7241908a7",
+    "type": "recall",
+  },
+  {
+    "detail": "Direct Withdraw -13.99 USDCx",
+    "txHash": "917fc9ae0c08af619249d1c539e22c13668342a9c9902c27baa251a7493f0fdd",
+    "type": "batch_withdraw",
+  },
+  {
+    "detail": "SupplyToLiqwid 32.50 USDCx",
+    "txHash": "176a6f17714a99b8c1990ffcb5748ec3cc7c5cda34d56cedaa167c5d5366ce1d",
+    "type": "supply",
+  },
+  {
+    "detail": "RecallFromLiqwid 32.50 USDCx",
+    "txHash": "a8218457f73c291f1c63f48c1d013aa13e0befb380f4bc63006e6d15e473acca",
+    "type": "recall",
+  },
+  {
+    "detail": "SupplyToLiqwid 32.50 USDCx",
+    "txHash": "22564b795cc1365c5d26ba02d6bad1c8696b5d292c30a18faa751dd19d66538a",
+    "type": "supply",
+  },
+  {
+    "detail": "RecallFromLiqwid 32.50 USDCx",
+    "txHash": "562581a25bff7c2e0c1c768ec21aa2f7d4cfab9e6c858f9de0be273ed3c16a57",
+    "type": "recall",
+  },
+  {
+    "detail": "SupplyToLiqwid 32.50 USDCx",
+    "txHash": "395727998c420c07589bd86988716ca36fee6ec2e1abe4d988b1dde3ca615caf",
+    "type": "supply",
+  },
+  {
+    "detail": "RecallFromLiqwid 32.50 USDCx",
+    "txHash": "5efd2d3aa13222df13d09769c00dbdcfc60b2fcdb333475d44e34fab9a567e70",
+    "type": "recall",
+  },
+  {
+    "detail": "SupplyToLiqwid 32.50 USDCx",
+    "txHash": "6c335579314892b1f5cb42035d50c028ba424866ff59359ebe84c5140bbb12bf",
+    "type": "supply",
+  },
+  {
+    "detail": "Direct Deposit +50.00 USDCx",
+    "txHash": "7297584002e7a707ce37a676fdd3c556fc86be7fc7a926db239e546288da1764",
+    "type": "batch_deposit",
+  },
+  {
+    "detail": "Vault deployed (ceremony genesis)",
+    "txHash": "2f7f0bbb2a1203855e3f98a66295dac89008eb4950730c1a013c46ebb0c08d8a",
+    "type": "vault_tx",
+  },
+]
+`;
+
+exports[`keeperHistoryWalker — action-type classification > vault-lifecycle fixture classifies to a stable snapshot 1`] = `
+[
+  {
+    "detail": "Direct Withdraw -0.00 USDCx",
+    "txHash": "bbe1bb838103b3a74ce09c00f6dd2fb2635615be8d65d0047ee18cc8882d03f9",
+    "type": "batch_withdraw",
+  },
+  {
+    "detail": "Direct Withdraw -38.00 USDCx",
+    "txHash": "e65d996038c8ac800fc6c692ef9e49433e6a4d7712cc7c821d01bb29a3e93b5d",
+    "type": "batch_withdraw",
+  },
+  {
+    "detail": "Direct Withdraw -10.00 USDCx",
+    "txHash": "5dec10c065446ce2d8cd4f8d2257bd66635ea526308b26d7a7be38ef3e52e964",
+    "type": "batch_withdraw",
+  },
+  {
+    "detail": "DeployToProtocol",
+    "txHash": "9b4752f9f89792f712c3768acfe09133ca174cd88d2949963097077cab5a90bd",
+    "type": "deploy",
+  },
+  {
+    "detail": "RecallFromLiqwid 5.00 USDCx",
+    "txHash": "51080090f8c1dc1047fc48e59df318840f69ed2644b6d4dc58bb2a84a935e32b",
+    "type": "recall",
+  },
+  {
+    "detail": "CommunitySunset triggered",
+    "txHash": "bb82be993743f94580ac245172f01c41e45645dd8118c62535447cbc59a997a2",
+    "type": "vault_tx",
+  },
+  {
+    "detail": "DeployToProtocol",
+    "txHash": "ed6522c627ad6e537be27aa138c3ecf57ca95c3135c58b19aac0479bae1f4607",
+    "type": "deploy",
+  },
+  {
+    "detail": "EmergencyWithdraw (gov)",
+    "txHash": "e1494722738096fbdea16529f9609ef76c950dfaa155896e6c5dcbff21e1b47d",
+    "type": "vault_tx",
+  },
+  {
+    "detail": "MergeUtxo",
+    "txHash": "7955c209b88ab4165f2c9a884bb36764ae38794bc0547457da46256b1d571927",
+    "type": "merge",
+  },
+  {
+    "detail": "Token top-up (+2.00 ADA + 1 asset NoDatum)",
+    "txHash": "dc1ee855672dea45501e8d2112bc6cec15f08241f9ecd8a7e01c04d6fcbefb53",
+    "type": "donation",
+  },
+  {
+    "detail": "SupplyToLiqwid 5.00 USDCx",
+    "txHash": "0aa633c47ec5658c9d10723fb3f9022f7cc7198c201e21af63c3ebac3cf0bd99",
+    "type": "supply",
+  },
+  {
+    "detail": "Direct Deposit +50.00 USDCx",
+    "txHash": "cae093526f22608138ce29dcc5cbe5841da959893cc2fa4fe699d03e0139cf56",
+    "type": "batch_deposit",
+  },
+  {
+    "detail": "EmergencyWithdraw (gov)",
+    "txHash": "9c25ab4106bd0a45d1fa6aef77799e6254c61cdd3273439a2ec333fac9fcac9c",
+    "type": "vault_tx",
+  },
+  {
+    "detail": "Direct Withdraw -49.50 USDCx",
+    "txHash": "b841e0e1aa23afaf4060d18ec7b6e3813d9a04aa355f0571e79a40a7823b8e6e",
+    "type": "batch_withdraw",
+  },
+  {
+    "detail": "RecallFromLiqwid 5.00 USDCx",
+    "txHash": "60643c55cd649369fc8b41fbb721582364f88d9120c22d356fa2c1ecd536c041",
+    "type": "recall",
+  },
+  {
+    "detail": "EmergencyWithdraw (gov)",
+    "txHash": "36e056cb011d6b4b02be0b1b6e7890a5bdb3b28d8cbc5bf2b5d7d289b8aba8d6",
+    "type": "vault_tx",
+  },
+  {
+    "detail": "Direct Withdraw -0.50 USDCx",
+    "txHash": "3cc0ea87f1c22c62a462711b94d0041c659277831a9b43ef6930effa23356ea8",
+    "type": "batch_withdraw",
+  },
+  {
+    "detail": "MergeUtxo",
+    "txHash": "3ec6088eaac124635139c88acd9e699969a8d86ffeb6e12a0df58669b3184a29",
+    "type": "merge",
+  },
+  {
+    "detail": "DEX order cancel",
+    "txHash": "e6bc0a7d2b05dd765ffffa719075e07db7418bd7432b093057336563f00871ed",
+    "type": "vault_tx",
+  },
+  {
+    "detail": "ADA top-up (+5.00 ADA NoDatum)",
+    "txHash": "98de70888d06add299d91b312d73288271637af63b0bb4ef6796e272c8ea1f0a",
+    "type": "donation",
+  },
+  {
+    "detail": "DeployToProtocol",
+    "txHash": "7abe6802d88b8e6367bf16dcc176ce2e282a644b7035e9d3133e029ae842bd06",
+    "type": "deploy",
+  },
+  {
+    "detail": "MergeUtxo",
+    "txHash": "02706557ca37f94dca360dcc0367ca0044695c6fdcf872f6fa9dfd455d8f05da",
+    "type": "merge",
+  },
+  {
+    "detail": "DEX order cancel",
+    "txHash": "7cc95746bc15278b8eed84df28112d75c6c06f0fd8717fbb6ca115894f0dcdd7",
+    "type": "vault_tx",
+  },
+  {
+    "detail": "ADA top-up (+5.00 ADA NoDatum)",
+    "txHash": "6e950e4c4aabf4e827187b0eb15f2f0463b4fad8168fdafdab06804cf07eff67",
+    "type": "donation",
+  },
+  {
+    "detail": "DeployToProtocol",
+    "txHash": "400b73631de6ac4a5b678ecfc35f150a1103e357cc1410e5b66beb32144abaa3",
+    "type": "deploy",
+  },
+  {
+    "detail": "MergeUtxo",
+    "txHash": "3fea2e6682ad281a2950c64e1c46f5509a833515a1f50ad8f045ba10479a5b5c",
+    "type": "merge",
+  },
+  {
+    "detail": "DEX order cancel",
+    "txHash": "516bf4fc68283b484e6bc37ca8366a19f2fd8509e4f369cd618134f60c97ccb2",
+    "type": "vault_tx",
+  },
+  {
+    "detail": "DeployToProtocol",
+    "txHash": "6e3937c979830d9465cfd7e8fb4130733d590f0ecce56e57ce5a48b32b62454d",
+    "type": "deploy",
+  },
+  {
+    "detail": "MergeUtxo",
+    "txHash": "35428b16ec59cfcf2396a082c74bb4255ec3d09fc6c95ee48cb59973e29459c2",
+    "type": "merge",
+  },
+  {
+    "detail": "DEX order cancel",
+    "txHash": "ed46bdf6316b30fbfdc3e199aae686c78593d81948566d60b09ff46723fa547b",
+    "type": "vault_tx",
+  },
+  {
+    "detail": "DeployToProtocol",
+    "txHash": "ac1dc2f23857b0d1f45fd07c4f2b828318542b668224f56d5ae80de49b3d08e6",
+    "type": "deploy",
+  },
+  {
+    "detail": "SupplyToLiqwid 5.00 USDCx",
+    "txHash": "1b5f121445d061215d2619e14f3cb8ac976d9fda6dfcacdd0c29427ae9a7ae4c",
+    "type": "supply",
+  },
+  {
+    "detail": "Direct Deposit +50.00 USDCx",
+    "txHash": "67c5ad50bff1ce1b7a4bd6b8f03960c648ad43ac2cc30bad39fd150f2717d665",
+    "type": "batch_deposit",
+  },
+  {
+    "detail": "Vault deployed (ceremony genesis)",
+    "txHash": "7182010c8956cac02c119a9c05611a15af6cbda8712d40ccd574787a42576d83",
+    "type": "vault_tx",
+  },
+]
+`;
