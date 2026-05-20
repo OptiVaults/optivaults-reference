@@ -205,20 +205,25 @@ export async function fetchKeeperActionsFromR2(
   )
 
   // Merge + dedupe by txHash, keep latest by ts.
+  // `timestamp` is an ISO 8601 string — `Number(iso)` returns `NaN`, so
+  // an earlier version of this code collapsed every comparison to 0
+  // and lost the dedup/sort. Parse to epoch ms via `Date` instead;
+  // fall back to `slot` if both timestamps are unparseable.
+  const tsKey = (r: KeeperActionRecord): number => {
+    const t = new Date(r.timestamp).getTime()
+    if (Number.isFinite(t)) return t
+    return r.slot ?? 0
+  }
   const merged = new Map<string, KeeperActionRecord>()
   for (const r of results) {
     if (r.status !== 'fulfilled') continue
     for (const rec of r.value) {
       const prior = merged.get(rec.txHash)
-      if (!prior || (Number(rec.timestamp) || 0) > (Number(prior.timestamp) || 0)) {
+      if (!prior || tsKey(rec) > tsKey(prior)) {
         merged.set(rec.txHash, rec)
       }
     }
   }
 
-  return Array.from(merged.values()).sort((a, b) => {
-    const at = Number(a.timestamp) || 0
-    const bt = Number(b.timestamp) || 0
-    return bt - at
-  })
+  return Array.from(merged.values()).sort((a, b) => tsKey(b) - tsKey(a))
 }
