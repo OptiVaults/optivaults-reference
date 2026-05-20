@@ -24,5 +24,10 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  // Test files run under vitest (own config + Node env), not shipped in
+  // the app bundle — keep them out of the production `tsc -b` build so
+  // test-only deps (node: builtins, fixtures) needn't satisfy the
+  // browser-app tsconfig.
+  "exclude": ["src/__tests__"]
 }
