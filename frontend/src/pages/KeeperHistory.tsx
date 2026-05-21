@@ -60,10 +60,14 @@ export default function KeeperHistory() {
     return () => { clearInterval(timer); document.removeEventListener('visibilitychange', onVisible) }
   }, [t])
 
-  // Stats summary
-  const compoundActions = actions.filter(a => a.type === 'compound')
-  const totalProfit = compoundActions.reduce((sum, a) => sum + parseFloat(a.profitUsdcx), 0)
+  // Stats summary — count realized yield from every record that carries
+  // a non-zero `profitUsdcx`. Pre-2026-05-21 the keeper only stamped it
+  // on `compound` rows; post-fix Recall rows on the deposit-token Liqwid
+  // market also carry realized PnL. Sum across all types so we don't
+  // under-report when yield surfaces on a Recall.
+  const totalProfit = actions.reduce((sum, a) => sum + parseFloat(a.profitUsdcx), 0)
   const totalFees = actions.reduce((sum, a) => sum + parseFloat(a.estTxFeeAda), 0)
+  const unrealizedUsdcx = vault.unrealizedYieldTotal / 1e6
 
   const totalPages = Math.ceil(actions.length / PAGE_SIZE)
   const pagedActions = actions.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
@@ -85,15 +89,33 @@ export default function KeeperHistory() {
           </div>
           <div className="glass-card rounded-xl p-3 sm:p-4 text-center">
             <p className="text-slate-500 text-[10px] sm:text-xs">{t('keeper.totalProfit')}</p>
-            <p className="text-emerald-400 text-lg sm:text-xl font-bold mt-1">+{totalProfit.toFixed(2)}</p>
-            <p className="text-slate-500 text-[9px] sm:text-[10px]">USDCx</p>
-            {totalProfit === 0 && (
-              <p className="text-cyan-400/80 text-[9px] sm:text-[10px] mt-0.5 leading-tight">
-                {t('keeper.accruing') || 'Accruing in Liqwid'}
-                {vault.unrealizedYieldTotal > 0 && (
-                  <> +{(vault.unrealizedYieldTotal / 1e6).toFixed(4)}</>
+            {totalProfit > 0 ? (
+              <>
+                <p className="text-emerald-400 text-lg sm:text-xl font-bold mt-1">+{totalProfit.toFixed(2)}</p>
+                <p className="text-slate-500 text-[9px] sm:text-[10px]">USDCx</p>
+                {unrealizedUsdcx > 0 && (
+                  <p className="text-cyan-400/80 text-[9px] sm:text-[10px] mt-0.5 leading-tight">
+                    {t('keeper.accruing') || 'Accruing in Liqwid'} +{unrealizedUsdcx.toFixed(4)}
+                  </p>
                 )}
-              </p>
+              </>
+            ) : unrealizedUsdcx > 0 ? (
+              // No realized yield yet, but Liqwid positions are accruing — promote
+              // the unrealized number so the dashboard never falsely reads "+0.00"
+              // when the vault is mid-cycle. The cyan colour + accruing subline
+              // signals that the number isn't yet locked in.
+              <>
+                <p className="text-cyan-400 text-lg sm:text-xl font-bold mt-1">+{unrealizedUsdcx.toFixed(4)}</p>
+                <p className="text-slate-500 text-[9px] sm:text-[10px]">USDCx</p>
+                <p className="text-cyan-400/80 text-[9px] sm:text-[10px] mt-0.5 leading-tight">
+                  {t('keeper.accruing') || 'Accruing in Liqwid'}
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-emerald-400 text-lg sm:text-xl font-bold mt-1">+0.00</p>
+                <p className="text-slate-500 text-[9px] sm:text-[10px]">USDCx</p>
+              </>
             )}
           </div>
           <div className="glass-card rounded-xl p-3 sm:p-4 text-center">
